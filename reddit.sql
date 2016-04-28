@@ -24,7 +24,7 @@ CREATE TABLE `posts` (
   CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
---This creates subreddits table.
+--This creates subreddits table. Id is primary key, description is optional, name has unique constraint.
 CREATE TABLE `subreddits` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(30) NOT NULL,
@@ -34,3 +34,7 @@ CREATE TABLE `subreddits` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--Alter table posts. Add column subredditId which references primary key id in subreddits table.
+ALTER TABLE posts ADD COLUMN (`subredditId` INT);
+ALTER TABLE posts ADD FOREIGN KEY (`subredditId`) REFERENCES subreddits(`id`) ON DELETE SET NULL; 

@@ -3,9 +3,9 @@ var mysql = require('mysql');
 
 // create a connection to our Cloud9 server
 var connection = mysql.createConnection({
-  host     : 'localhost',
-  user     : 'mariegodon',
-  password : '',
+  host: 'localhost',
+  user: 'mariegodon',
+  password: '',
   database: 'reddit'
 });
 
@@ -66,10 +66,33 @@ var redditAPI = reddit(connection);
 //   }
 // });
 
-redditAPI.getSinglePost(23, function(err, result){
+// redditAPI.getSinglePost(23, function(err, result){
+//   if (err) {
+//     console.log(err);
+//   } else {
+//     console.log(result);
+//   }
+// });
+
+// redditAPI.getAllSubreddits(function(err, sub) {
+//   if (err) {
+//     console.log(err);
+//   }
+//   else {
+//     console.log(sub);
+//   }
+// });
+
+redditAPI.createPost({
+  title: 'hot hot hot',
+  url: 'https://www.reddit.com',
+  userId: 1,
+  subredditId: 1
+}, function(err, post) {
   if (err) {
     console.log(err);
-  } else {
-    console.log(result);
+  }
+  else {
+    console.log(post);
   }
 });

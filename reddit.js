@@ -60,7 +60,7 @@ module.exports = function RedditAPI(conn) {
         },
         createPost: function(post, callback) {
             conn.query(
-                'INSERT INTO `posts` (`userId`, `title`, `url`, `createdAt`) VALUES (?, ?, ?, ?)', [post.userId, post.title, post.url, null],
+                'INSERT INTO `posts` (`userId`, `title`, `url`, `createdAt`, `subredditId`) VALUES (?, ?, ?, ?, ?)', [post.userId, post.title, post.url, null, post.subredditId],
                 function(err, result) {
                     if (err) {
                         callback(err);
@@ -71,7 +71,7 @@ module.exports = function RedditAPI(conn) {
                         the post and send it to the caller!
                         */
                         conn.query(
-                            'SELECT `id`,`title`,`url`,`userId`, `createdAt`, `updatedAt` FROM `posts` WHERE `id` = ?', [result.insertId],
+                            'SELECT `id`,`title`,`url`,`userId`, `createdAt`, `updatedAt`, `subredditId` FROM `posts` WHERE `id` = ?', [result.insertId],
                             function(err, result) {
                                 if (err) {
                                     callback(err);
@@ -146,23 +146,62 @@ module.exports = function RedditAPI(conn) {
                         callback(new Error("No posts for this user!"));
                     }
                     else {
-                        callback(results);
+                        callback(null, results);
                     }
                 });
         },
-        getSinglePost: function(postId, callback){
+        getSinglePost: function(postId, callback) {
             conn.query(`
             SELECT id AS postID, userId, title, createdAt, updatedAt FROM posts WHERE id = ?
-            `, [postId], function(err, results){
+            `, [postId], function(err, results) {
                 if (err) {
                     callback(err);
-                } else if (!results[0]) {
+                }
+                else if (!results[0]) {
                     callback(new Error("Invalid post ID!"));
-                } 
+                }
                 else {
-                    callback(results[0]);
+                    callback(null, results[0]);
                 }
             });
-        }
+        },
+        createSubreddit: function(sub, callback) {
+            //var description = sub.description || null;
+            conn.query(`
+        INSERT INTO subreddits (name, description, createdAt) VALUES (?, ?, ?)`, [sub.name, sub.description, null],
+                function(err, result) {
+                    if (err) {
+                        callback(err);
+                    }
+                    else {
+                        conn.query(`
+                    SELECT id AS subredditId, name AS subredditName, description AS subredditDescription, createdAt, updatedAt FROM subreddits WHERE name = ? 
+                    `, [sub.name], function(err, result) {
+                            if (err) {
+                                if (err.code === 'ER_DUP_ENTRY') {
+                                    callback(new Error('A subreddit with this name already exists'));
+                                }
+                                else {
+                                    callback(err);
+                                }
+                            }
+                            else {
+                                callback(null, result[0]);
+                            }
+                        });
+                    }
+                });
+        },
+    getAllSubreddits: function(callback){
+        conn.query(`
+            SELECT id AS subredditId, name AS subredditName, description AS subredditDescription, createdAt, updatedAt FROM subreddits ORDER BY createdAt DESC`,
+            function(err, result){
+                if (err){
+                    callback(err);
+                } else {
+                    callback(null, result);
+                }
+            });
+    }
     }
 }
