@@ -83,11 +83,24 @@ var redditAPI = reddit(connection);
 //   }
 // });
 
-redditAPI.createPost({
-  title: 'hot hot hot',
-  url: 'https://www.reddit.com',
-  userId: 1,
-  subredditId: 1
+// redditAPI.createPost({
+//   title: 'hot hot hot',
+//   url: 'https://www.reddit.com',
+//   userId: 1,
+//   subredditId: 1
+// }, function(err, post) {
+//   if (err) {
+//     console.log(err);
+//   }
+//   else {
+//     console.log(post);
+//   }
+// });
+
+redditAPI.createComment({
+  text: "the first comment",
+  postId: 5,
+  userId: 1
 }, function(err, post) {
   if (err) {
     console.log(err);

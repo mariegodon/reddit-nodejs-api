@@ -38,3 +38,21 @@ CREATE TABLE `subreddits` (
 --Alter table posts. Add column subredditId which references primary key id in subreddits table.
 ALTER TABLE posts ADD COLUMN (`subredditId` INT);
 ALTER TABLE posts ADD FOREIGN KEY (`subredditId`) REFERENCES subreddits(`id`) ON DELETE SET NULL; 
+
+--Create comments table with id primary key.
+CREATE TABLE `comments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+   `text` VARCHAR(10000) NOT NULL,
+  `createdAt` TIMESTAMP NOT NULL DEFAULT 0,
+  `updatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `parentId` INT DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+ --Add foreign key to parentId which references own column id
+ALTER TABLE comments ADD FOREIGN KEY (`parentId`) REFERENCES comments(`id`) ON DELETE SET NULL;
+--Was getting a weird error 
+--mysql> ALTER TABLE comments ADD FOREIGN KEY (`postId`) REFERENCES posts(`id`) ON DELETE SET NULL;
+--ERROR 1005 (HY000): Can't create table 'reddit.#sql-8d8_5e' (errno: 150)
+--therefore deleted the rows and readded them with foreign key immediately
+ALTER TABLE comments ADD COLUMN (postId INT, FOREIGN KEY (postId) REFERENCES posts(id) ON DELETE SET NULL);
+ALTER TABLE comments ADD COLUMN (userId INT, FOREIGN KEY (userId) REFERENCES users(id) ON DELETE SET NULL); 

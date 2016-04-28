@@ -96,8 +96,10 @@ module.exports = function RedditAPI(conn) {
 
             conn.query(`
                 SELECT p.id, p.title, p.url, p.userId, p.createdAt, p.updatedAt, 
-                u.id AS userId, u.username AS userUsername, u.createdAt AS userCreatedAt, u.updatedAt AS userUpdatedAt
-                FROM posts p JOIN users u ON p.userId = u.id
+                u.id AS userId, u.username AS userUsername, u.createdAt AS userCreatedAt, u.updatedAt AS userUpdatedAt,
+                s.id AS subredditId, s.name AS subredditName, s.description AS subredditDescription, 
+                s.createdAt AS subredditCreatedAt, s.updatedAt AS subredditUpdatedAt
+                FROM posts p JOIN users u ON p.userId = u.id LEFT JOIN subreddits s ON s.id = p.subredditId
                 ORDER BY p.createdAt DESC
                 LIMIT ? OFFSET ?
             `, [limit, offset],
@@ -118,6 +120,13 @@ module.exports = function RedditAPI(conn) {
                                     username: currObj.userUsername,
                                     createdAt: currObj.userCreatedAt,
                                     updatedAt: currObj.userUpdatedAt,
+                                },
+                                subreddit: {
+                                    id: currObj.subredditId,
+                                    name: currObj.subredditName,
+                                    description: currObj.subredditDescription,
+                                    createdAt: currObj.subredditCreatedAt,
+                                    updatedAt: currObj.subredditUpdatedAt
                                 }
                             }
                             return formatResults;
@@ -192,16 +201,38 @@ module.exports = function RedditAPI(conn) {
                     }
                 });
         },
-    getAllSubreddits: function(callback){
-        conn.query(`
+        getAllSubreddits: function(callback) {
+            conn.query(`
             SELECT id AS subredditId, name AS subredditName, description AS subredditDescription, createdAt, updatedAt FROM subreddits ORDER BY createdAt DESC`,
-            function(err, result){
-                if (err){
-                    callback(err);
-                } else {
-                    callback(null, result);
-                }
-            });
-    }
+                function(err, result) {
+                    if (err) {
+                        callback(err);
+                    }
+                    else {
+                        callback(null, result);
+                    }
+                });
+        },
+        createComment: function(comment, callback) {
+            conn.query(`
+            INSERT INTO comments (text, createdAt, parentId, postId, userId) VALUES (?, ?, ?, ?, ?)`, [comment.text, null, comment.parentId, comment.postId, comment.userId],
+                function(err, result) {
+                    if (err) {
+                        callback(err);
+                    }
+                    else {
+                        conn.query(`
+                        SELECT * FROM comments WHERE id = ?`, [result.insertId],
+                            function(err, result) {
+                                if (err) {
+                                    callback(err);
+                                }
+                                else {
+                                    callback(result[0]);
+                                }
+                            });
+                    }
+                });
+        }
     }
 }
