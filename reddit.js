@@ -259,7 +259,7 @@ module.exports = function RedditAPI(conn) {
             LEFT JOIN 
             (SELECT u.username, c.id, c.text, c.createdAt, c.updatedAt,
             c.parentId, c.userId FROM comments c LEFT JOIN users u ON u.id = c.userId) AS c2
-            ON (c2.parentId = c1.id) WHERE p.postId = ? AND p.parentId IS NULL  ORDER BY p.createdAt`,
+            ON (c2.parentId = c1.id) WHERE p.postId = ? AND p.parentId IS NULL ORDER BY p.createdAt, c1.createdAt, c2.createdAt`,
             [postId],
                 function(err, result) {
                     if (err) {

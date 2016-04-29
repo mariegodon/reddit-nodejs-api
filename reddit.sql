@@ -77,3 +77,4 @@ SELECT p.id AS parentId, p.text AS parentText, p.createdAt as parentCreatedAt, p
             
             
             
+            
