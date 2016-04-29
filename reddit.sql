@@ -57,6 +57,7 @@ ALTER TABLE comments ADD FOREIGN KEY (`parentId`) REFERENCES comments(`id`) ON D
 ALTER TABLE comments ADD COLUMN (postId INT, FOREIGN KEY (postId) REFERENCES posts(id) ON DELETE SET NULL);
 ALTER TABLE comments ADD COLUMN (userId INT, FOREIGN KEY (userId) REFERENCES users(id) ON DELETE SET NULL); 
 
+--Scratchpad for query to get comments
 SELECT p.id AS parentId, p.text AS parentText, p.createdAt as parentCreatedAt, p.updatedAt AS parentUpdatedAt,
             p.parentId AS parentParentId, p.userId AS parentUserId, p.username AS parentUserName, p.postId,
             c1.id AS c1Id, c1.text AS c1Text, c1.createdAt as c1CreatedAt, c1.updatedAt AS c1UpdatedAt,
@@ -73,8 +74,59 @@ SELECT p.id AS parentId, p.text AS parentText, p.createdAt as parentCreatedAt, p
             LEFT JOIN 
             (SELECT u.username, c.id, c.text, c.createdAt, c.updatedAt,
             c.parentId, c.userId FROM comments c LEFT JOIN users u ON u.id = c.userId) AS c2
-            ON (c2.parentId = c1.id) WHERE p.postId = 5 AND p.parentId IS NULL ORDER BY p.createdAt;
-            
-            
-            
-            
+            ON (c2.parentId = c1.id) WHERE p.postId = 5 ORDER BY p.createdAt;
+
+--Create votes "join" table. Primary key is combination of userId and postId
+--This way, many users can vote on many posts, but only once per post
+CREATE TABLE votes (
+  userId INT, FOREIGN KEY (userId) REFERENCES users(id), 
+  postId INT, FOREIGN KEY (postId) REFERENCES posts(id), 
+  PRIMARY KEY (userId, postId), 
+  vote TINYINT, 
+  createdAt TIMESTAMP NOT NULL DEFAULT 0,
+  updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--Top votes sorting method       
+SELECT p.id, p.title, p.url, p.userId, p.createdAt, p.updatedAt, 
+u.id AS userId, u.username AS userUsername, u.createdAt AS userCreatedAt, u.updatedAt AS userUpdatedAt,
+s.id AS subredditId, s.name AS subredditName, s.description AS subredditDescription, 
+s.createdAt AS subredditCreatedAt, s.updatedAt AS subredditUpdatedAt,
+SUM(v.vote) AS voteScore
+FROM posts p JOIN users u ON p.userId = u.id LEFT JOIN subreddits s ON s.id = p.subredditId LEFT JOIN votes v ON v.postId = p.id
+GROUP BY p.id ORDER BY voteScore DESC;
+
+--Most up votes sorting method   
+--Not necessarily a reddit sorting method
+--SELECT p.id, p.title, p.url, p.userId, p.createdAt, p.updatedAt, 
+--u.id AS userId, u.username AS userUsername, u.createdAt AS userCreatedAt, u.updatedAt AS userUpdatedAt,
+--s.id AS subredditId, s.name AS subredditName, s.description AS subredditDescription,
+--s.createdAt AS subredditCreatedAt, s.updatedAt AS subredditUpdatedAt,
+--SUM(v.vote) AS numUpVotes
+--FROM posts p JOIN users u ON p.userId = u.id LEFT JOIN subreddits s ON s.id = p.subredditId LEFT JOIN votes v ON v.postId = p.id WHERE v.vote = 1
+--GROUP BY p.id ORDER BY numUpVotes DESC;
+
+--hotness query
+SELECT p.id, p.title, p.url, p.userId, p.createdAt, p.updatedAt, 
+u.id AS userId, u.username AS userUsername, u.createdAt AS userCreatedAt, u.updatedAt AS userUpdatedAt,
+s.id AS subredditId, s.name AS subredditName, s.description AS subredditDescription,
+s.createdAt AS subredditCreatedAt, s.updatedAt AS subredditUpdatedAt, 
+SUM(v.vote)/(NOW()-v.createdAt) AS hotness
+FROM posts p JOIN users u ON p.userId = u.id LEFT JOIN subreddits s ON s.id = p.subredditId LEFT JOIN votes v ON v.postId = p.id WHERE v.vote = 1
+GROUP BY p.id ORDER BY hotness DESC;
+
+--controversial query
+SELECT p.id, p.title, p.url, p.userId, p.createdAt, p.updatedAt, 
+u.id AS userId, u.username AS userUsername, u.createdAt AS userCreatedAt, u.updatedAt AS userUpdatedAt,
+s.id AS subredditId, s.name AS subredditName, s.description AS subredditDescription,
+s.createdAt AS subredditCreatedAt, s.updatedAt AS subredditUpdatedAt,
+if(SUM(vote) < 0, COUNT(*) * (sum(if(vote >0, 1, 0))/sum(if(vote<0, 1, 0))), (COUNT(*) * (sum(if(vote<0, 1, 0))/(sum(if(vote >0, 1, 0)))))) as controversyScore
+FROM posts p JOIN users u ON p.userId = u.id LEFT JOIN subreddits s ON s.id = p.subredditId LEFT JOIN votes v ON v.postId = p.id 
+GROUP BY p.id ORDER BY controversyScore DESC;
+
+--Testing controversial query
+SELECT if(SUM(vote) < 0, COUNT(*) * (sum(if(vote >0, 1, 0))/sum(if(vote<0, 1, 0))), (COUNT(*) * (sum(if(vote<0, 1, 0))/(sum(if(vote >0, 1, 0)))))) as controversy, 
+postId FROM votes GROUP BY postId ORDER BY controversy DESC;
+
+SELECT if(SUM(vote) > 0, COUNT(*) * (up/down), COUNT(*)*(down/up))
+               

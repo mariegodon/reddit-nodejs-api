@@ -39,7 +39,7 @@ var redditAPI = reddit(connection);
 // });
 
 // redditAPI.createPost({
-//       title: 'bye reddit!',
+//       title: 'some post!',
 //       url: 'https://www.reddit.com',
 //       userId: 3,
 //     }, function(err, post) {
@@ -51,7 +51,9 @@ var redditAPI = reddit(connection);
 //       }
 //     });
 
-// redditAPI.getAllPosts(function(err, result){
+// redditAPI.getAllPosts(
+// {sortingMethod: "hot"},
+//   function(err, result){
 //   if (err) {
 //     console.log(err);
 //   } else {
@@ -59,7 +61,7 @@ var redditAPI = reddit(connection);
 //   }
 // });
 
-// redditAPI.getAllPostsForUser(7, function(err, result){
+// redditAPI.getAllPostsForUser(1, function(err, result){
 //   if (err) {
 //     console.log(err);
 //   } else {
@@ -67,13 +69,13 @@ var redditAPI = reddit(connection);
 //   }
 // });
 
-redditAPI.getSinglePost(5, function(err, result){
-  if (err) {
-    console.log(err);
-  } else {
-    console.log(util.inspect(result, { showHidden: true, depth: 10, colors: true }));
-  }
-});
+// redditAPI.getSinglePost(5, function(err, result){
+//   if (err) {
+//     console.log(err);
+//   } else {
+//     console.log(util.inspect(result, { showHidden: true, depth: 10, colors: true }));
+//   }
+// });
 
 // redditAPI.getAllSubreddits(function(err, sub) {
 //   if (err) {
@@ -120,4 +122,16 @@ redditAPI.getSinglePost(5, function(err, result){
 //     console.log(util.inspect(sub, { showHidden: true, depth: 10, colors: true }));
 //   }
 // });
+
+// redditAPI.createOrUpdateVote(
+//   {vote: 1,
+//   userId: 8,
+//   postId: 4},
+//   function(err, result){
+//     if (err) {
+//       console.log(err);
+//     } else {
+//       console.log(result);
+//     }
+//   });
 
