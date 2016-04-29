@@ -56,3 +56,5 @@ ALTER TABLE comments ADD FOREIGN KEY (`parentId`) REFERENCES comments(`id`) ON D
 --therefore deleted the rows and readded them with foreign key immediately
 ALTER TABLE comments ADD COLUMN (postId INT, FOREIGN KEY (postId) REFERENCES posts(id) ON DELETE SET NULL);
 ALTER TABLE comments ADD COLUMN (userId INT, FOREIGN KEY (userId) REFERENCES users(id) ON DELETE SET NULL); 
+
+SELECT p.id AS parentId, p.text AS parentText, p.createdAt as parentCreatedAt, p.updatedAt AS parentUpdatedAt,             p.parentId AS parentParentId, p.userId AS parentUserId,             c1.id AS c1Id, c1.text AS c1Text, c1.createdAt as c1CreatedAt, c1.updatedAt AS c1UpdatedAt,             c1.parentId AS c1ParentId, c1.userId AS c1UserId             FROM comments p LEFT JOIN comments c1 ON c1.parentId = p.id WHERE p.postId = 5;

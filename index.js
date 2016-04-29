@@ -1,5 +1,6 @@
 // load the mysql library
 var mysql = require('mysql');
+var util = require('util');
 
 // create a connection to our Cloud9 server
 var connection = mysql.createConnection({
@@ -66,13 +67,13 @@ var redditAPI = reddit(connection);
 //   }
 // });
 
-// redditAPI.getSinglePost(23, function(err, result){
-//   if (err) {
-//     console.log(err);
-//   } else {
-//     console.log(result);
-//   }
-// });
+redditAPI.getSinglePost(5, function(err, result){
+  if (err) {
+    console.log(err);
+  } else {
+    console.log(util.inspect(result, { showHidden: true, depth: 10, colors: true }));
+  }
+});
 
 // redditAPI.getAllSubreddits(function(err, sub) {
 //   if (err) {
@@ -97,15 +98,26 @@ var redditAPI = reddit(connection);
 //   }
 // });
 
-redditAPI.createComment({
-  text: "the first comment",
-  postId: 5,
-  userId: 1
-}, function(err, post) {
-  if (err) {
-    console.log(err);
-  }
-  else {
-    console.log(post);
-  }
-});
+// redditAPI.createComment({
+//   text: "i love starbucks",
+//   postId: 5,
+//   userId: 1,
+//   parentId: 9
+// }, function(err, post) {
+//   if (err) {
+//     console.log(err);
+//   }
+//   else {
+//     console.log(post);
+//   }
+// });
+
+// redditAPI.getCommentsForPost(5, function(err, sub) {
+//   if (err) {
+//     console.log(err);
+//   }
+//   else {
+//     console.log(util.inspect(sub, { showHidden: true, depth: 10, colors: true }));
+//   }
+// });
+

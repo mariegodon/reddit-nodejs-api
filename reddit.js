@@ -160,6 +160,7 @@ module.exports = function RedditAPI(conn) {
                 });
         },
         getSinglePost: function(postId, callback) {
+            var that = this;
             conn.query(`
             SELECT id AS postID, userId, title, createdAt, updatedAt FROM posts WHERE id = ?
             `, [postId], function(err, results) {
@@ -170,7 +171,13 @@ module.exports = function RedditAPI(conn) {
                     callback(new Error("Invalid post ID!"));
                 }
                 else {
-                    callback(null, results[0]);
+                    that.getCommentsForPost(postId, function(err, commentResult){
+                        if (commentResult) {
+                            results.push(commentResult);
+                            callback(null, results);
+                        }
+                    });
+                    //callback(null, results);    
                 }
             });
         },
@@ -209,7 +216,7 @@ module.exports = function RedditAPI(conn) {
                         callback(err);
                     }
                     else {
-                        callback(null, result);
+                        callback(null, result[0]);
                     }
                 });
         },
@@ -228,11 +235,102 @@ module.exports = function RedditAPI(conn) {
                                     callback(err);
                                 }
                                 else {
-                                    callback(result[0]);
+                                    callback(null, result[0]);
                                 }
                             });
                     }
                 });
+        },
+        getCommentsForPost: function(postId, callback) {
+            conn.query(`
+            SELECT p.id AS parentId, p.text AS parentText, p.createdAt as parentCreatedAt, p.updatedAt AS parentUpdatedAt,
+            p.parentId AS parentParentId, p.userId AS parentUserId,
+            c1.id AS c1Id, c1.text AS c1Text, c1.createdAt as c1CreatedAt, c1.updatedAt AS c1UpdatedAt,
+            c1.parentId AS c1ParentId, c1.userId AS c1UserId,
+            c2.id AS c2Id, c2.text AS c2Text, c2.createdAt as c2CreatedAt, c2.updatedAt AS c2UpdatedAt,
+            c2.parentId AS c2ParentId, c2.userId AS c2UserId
+            FROM comments p LEFT JOIN comments c1 ON (c1.parentId = p.id) LEFT JOIN comments c2 ON (c2.parentId = c1.id) WHERE p.postId = ?  ORDER BY p.createdAt`, [postId],
+                function(err, result) {
+                    if (err) {
+                        callback(err);
+                    }
+                    else {
+                        result = result.reduce(function(finalArr, currObj) {
+                            //if nothing in array, take first parent comment and add it
+                            if (finalArr.length === 0) {
+                                finalArr.push(newComment(currObj, "parent"));
+                            }
+                            else if (!currObj.parentParentId) {
+                                //check to see if parent already exists 
+                                var parentIndex = -1;
+                                finalArr.forEach(function(post, index) {
+                                    if (post.id === currObj.parentId) {
+                                        //if yes, save index of this parent
+                                        parentIndex = index;
+                                        return;
+                                    }
+                                });
+                                //if yes, and if this parent has a c1 child
+                                if (parentIndex !== -1 && currObj.c1Id) {
+                                    //check if this is the first c1, if yes, create replies
+                                    if (!finalArr[parentIndex].replies) {
+                                        finalArr[parentIndex].replies = [];
+                                        //push c1 (and its c2 if it exists)
+                                        finalArr[parentIndex].replies.push(newComment(currObj, "c1"));
+                                    }
+                                    else {
+                                        //if not the first c1, check to see if it already exists
+                                        var c1Index = -1;
+                                        finalArr[parentIndex].replies.forEach(function(child, childIndex) {
+                                            if (child.id === currObj.c1Id) {
+                                                c1Index = childIndex;
+                                                return;
+                                            }
+                                        });
+                                        //c1 exists, and has a c2
+                                        if (c1Index !== -1 && currObj.c2Id) {
+                                            //add this c2
+                                            finalArr[parentIndex].replies[c1Index].replies.push(newComment(currObj, "c2"));
+                                        }
+                                        //c1 does not exist, add it (and its c2 if it has)
+                                        else {
+                                            finalArr[parentIndex].replies.push(newComment(currObj, "c1"));
+                                        }
+                                    }
+
+                                }
+                                //if comment is not inside final array and it is a parent, create new parent
+                                else {
+                                    finalArr.push(newComment(currObj, "parent"));
+                                }
+                            }
+                            return finalArr;
+                        }, []);
+                    }
+                    callback(null, result)
+                });
         }
     }
+}
+
+function newComment(currObj, level) {
+    var newCommentObj = {};
+    newCommentObj.id = currObj[`${level}Id`];
+    newCommentObj.text = currObj[`${level}Text`];
+    newCommentObj.createdAt = currObj[`${level}CreatedAt`];
+    newCommentObj.updatedAt = currObj[`${level}UpdatedAt`];
+    newCommentObj.userId = currObj[`${level}UserId`];
+    if (level === "parent") {
+        if (currObj.c1Id) {
+            newCommentObj.replies = [];
+            newCommentObj.replies.push(newComment(currObj, "c1"));
+        }
+    }
+    if (level === "c1") {
+        if (currObj.c2Id) {
+            newCommentObj.replies = [];
+            newCommentObj.replies.push(newComment(currObj, "c2"));
+        }
+    }
+    return newCommentObj;
 }
