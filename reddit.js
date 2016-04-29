@@ -242,14 +242,25 @@ module.exports = function RedditAPI(conn) {
                 });
         },
         getCommentsForPost: function(postId, callback) {
-            conn.query(`
-            SELECT p.id AS parentId, p.text AS parentText, p.createdAt as parentCreatedAt, p.updatedAt AS parentUpdatedAt,
-            p.parentId AS parentParentId, p.userId AS parentUserId,
+            conn.query(
+            `SELECT p.id AS parentId, p.text AS parentText, p.createdAt as parentCreatedAt, p.updatedAt AS parentUpdatedAt,
+            p.parentId AS parentParentId, p.userId AS parentUserId, p.username AS parentUserName, p.postId,
             c1.id AS c1Id, c1.text AS c1Text, c1.createdAt as c1CreatedAt, c1.updatedAt AS c1UpdatedAt,
-            c1.parentId AS c1ParentId, c1.userId AS c1UserId,
+            c1.parentId AS c1ParentId, c1.userId AS c1UserId, c1.username AS c1UserName,
             c2.id AS c2Id, c2.text AS c2Text, c2.createdAt as c2CreatedAt, c2.updatedAt AS c2UpdatedAt,
-            c2.parentId AS c2ParentId, c2.userId AS c2UserId
-            FROM comments p LEFT JOIN comments c1 ON (c1.parentId = p.id) LEFT JOIN comments c2 ON (c2.parentId = c1.id) WHERE p.postId = ?  ORDER BY p.createdAt`, [postId],
+            c2.parentId AS c2ParentId, c2.userId AS c2UserId, c2.userName AS c2UserName
+            FROM 
+            (SELECT u.username, c.id, c.text, c.createdAt, c.updatedAt,
+            c.parentId, c.userId, c.postId FROM comments c LEFT JOIN users u ON u.id = c.userId) AS p
+            LEFT JOIN 
+            (SELECT u.username, c.id, c.text, c.createdAt, c.updatedAt,
+            c.parentId, c.userId FROM comments c LEFT JOIN users u ON u.id = c.userId) AS c1
+            ON (c1.parentId = p.id) 
+            LEFT JOIN 
+            (SELECT u.username, c.id, c.text, c.createdAt, c.updatedAt,
+            c.parentId, c.userId FROM comments c LEFT JOIN users u ON u.id = c.userId) AS c2
+            ON (c2.parentId = c1.id) WHERE p.postId = ? AND p.parentId IS NULL  ORDER BY p.createdAt`,
+            [postId],
                 function(err, result) {
                     if (err) {
                         callback(err);
@@ -260,7 +271,7 @@ module.exports = function RedditAPI(conn) {
                             if (finalArr.length === 0) {
                                 finalArr.push(newComment(currObj, "parent"));
                             }
-                            else if (!currObj.parentParentId) {
+                            else {
                                 //check to see if parent already exists 
                                 var parentIndex = -1;
                                 finalArr.forEach(function(post, index) {
@@ -319,7 +330,7 @@ function newComment(currObj, level) {
     newCommentObj.text = currObj[`${level}Text`];
     newCommentObj.createdAt = currObj[`${level}CreatedAt`];
     newCommentObj.updatedAt = currObj[`${level}UpdatedAt`];
-    newCommentObj.userId = currObj[`${level}UserId`];
+    newCommentObj.username = currObj[`${level}UserName`];
     if (level === "parent") {
         if (currObj.c1Id) {
             newCommentObj.replies = [];

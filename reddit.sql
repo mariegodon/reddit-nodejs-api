@@ -57,4 +57,23 @@ ALTER TABLE comments ADD FOREIGN KEY (`parentId`) REFERENCES comments(`id`) ON D
 ALTER TABLE comments ADD COLUMN (postId INT, FOREIGN KEY (postId) REFERENCES posts(id) ON DELETE SET NULL);
 ALTER TABLE comments ADD COLUMN (userId INT, FOREIGN KEY (userId) REFERENCES users(id) ON DELETE SET NULL); 
 
-SELECT p.id AS parentId, p.text AS parentText, p.createdAt as parentCreatedAt, p.updatedAt AS parentUpdatedAt,             p.parentId AS parentParentId, p.userId AS parentUserId,             c1.id AS c1Id, c1.text AS c1Text, c1.createdAt as c1CreatedAt, c1.updatedAt AS c1UpdatedAt,             c1.parentId AS c1ParentId, c1.userId AS c1UserId             FROM comments p LEFT JOIN comments c1 ON c1.parentId = p.id WHERE p.postId = 5;
+SELECT p.id AS parentId, p.text AS parentText, p.createdAt as parentCreatedAt, p.updatedAt AS parentUpdatedAt,
+            p.parentId AS parentParentId, p.userId AS parentUserId, p.username AS parentUserName, p.postId,
+            c1.id AS c1Id, c1.text AS c1Text, c1.createdAt as c1CreatedAt, c1.updatedAt AS c1UpdatedAt,
+            c1.parentId AS c1ParentId, c1.userId AS c1UserId, c1.username AS c1UserName,
+            c2.id AS c2Id, c2.text AS c2Text, c2.createdAt as c2CreatedAt, c2.updatedAt AS c2UpdatedAt,
+            c2.parentId AS c2ParentId, c2.userId AS c2UserId, c2.userName AS c2UserName
+            FROM 
+            (SELECT u.username, c.id, c.text, c.createdAt, c.updatedAt,
+            c.parentId, c.userId, c.postId FROM comments c LEFT JOIN users u ON u.id = c.userId) AS p
+            LEFT JOIN 
+            (SELECT u.username, c.id, c.text, c.createdAt, c.updatedAt,
+            c.parentId, c.userId FROM comments c LEFT JOIN users u ON u.id = c.userId) AS c1
+            ON (c1.parentId = p.id) 
+            LEFT JOIN 
+            (SELECT u.username, c.id, c.text, c.createdAt, c.updatedAt,
+            c.parentId, c.userId FROM comments c LEFT JOIN users u ON u.id = c.userId) AS c2
+            ON (c2.parentId = c1.id) WHERE p.postId = 5 AND p.parentId IS NULL ORDER BY p.createdAt;
+            
+            
+            
