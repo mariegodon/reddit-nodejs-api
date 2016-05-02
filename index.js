@@ -69,13 +69,13 @@ var redditAPI = reddit(connection);
 //   }
 // });
 
-// redditAPI.getSinglePost(5, function(err, result){
-//   if (err) {
-//     console.log(err);
-//   } else {
-//     console.log(util.inspect(result, { showHidden: true, depth: 10, colors: true }));
-//   }
-// });
+redditAPI.getSinglePost(2, function(err, result){
+  if (err) {
+    console.log(err);
+  } else {
+    console.log(util.inspect(result, { showHidden: true, depth: 10, colors: true }));
+  }
+});
 
 // redditAPI.getAllSubreddits(function(err, sub) {
 //   if (err) {

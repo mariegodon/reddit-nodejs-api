@@ -91,7 +91,7 @@ module.exports = function RedditAPI(conn) {
             }
             var limit = options.numPerPage || 25; // if options.numPerPage is "falsy" then use 25
             var offset = (options.page || 0) * limit;
-            
+
             //get the query to retrive posts sorted by given parameter
             var sortedQuery = getQueryForSorting(options.sortingMethod);
 
@@ -105,20 +105,20 @@ module.exports = function RedditAPI(conn) {
                         //map results to output in readable format
                         results = results.map(function(currObj) {
                             var formatResults = {
-                                id: currObj.id,
-                                title: currObj.title,
-                                url: currObj.url,
-                                createdAt: currObj.createdAt,
-                                updatedAt: currObj.updatedAt,
-                                //add user info in object
-                                user: {
-                                    id: currObj.userId,
-                                    username: currObj.userUsername,
-                                    createdAt: currObj.userCreatedAt,
-                                    updatedAt: currObj.userUpdatedAt,
+                                    id: currObj.id,
+                                    title: currObj.title,
+                                    url: currObj.url,
+                                    createdAt: currObj.createdAt,
+                                    updatedAt: currObj.updatedAt,
+                                    //add user info in object
+                                    user: {
+                                        id: currObj.userId,
+                                        username: currObj.userUsername,
+                                        createdAt: currObj.userCreatedAt,
+                                        updatedAt: currObj.userUpdatedAt,
+                                    }
                                 }
-                            }
-                            //check if subreddit info, and if yes add in object
+                                //check if subreddit info, and if yes add in object
                             if (currObj.subredditId) {
                                 formatResults.subredditId = {
                                     id: currObj.subredditId,
@@ -184,7 +184,7 @@ module.exports = function RedditAPI(conn) {
                     //get all comments for given postId
                     that.getCommentsForPost(postId, function(err, commentResult) {
                         if (err) {
-                            callback(err);
+                            callback(null, results);
                         }
                         else {
                             //push result from comments getCommentsForPost to result from getSinglePost
@@ -268,7 +268,7 @@ module.exports = function RedditAPI(conn) {
             //second children identified as c2
             //perform inner queries to join usernames to comments
             conn.query(
-            `SELECT p.id AS parentId, p.text AS parentText, p.createdAt as parentCreatedAt, p.updatedAt AS parentUpdatedAt,
+                `SELECT p.id AS parentId, p.text AS parentText, p.createdAt as parentCreatedAt, p.updatedAt AS parentUpdatedAt,
             p.parentId AS parentParentId, p.userId AS parentUserId, p.username AS parentUserName, p.postId,
             c1.id AS c1Id, c1.text AS c1Text, c1.createdAt as c1CreatedAt, c1.updatedAt AS c1UpdatedAt,
             c1.parentId AS c1ParentId, c1.userId AS c1UserId, c1.username AS c1UserName,
@@ -346,8 +346,8 @@ module.exports = function RedditAPI(conn) {
                             }
                             return finalArr;
                         }, []);
+                        callback(null, result);
                     }
-                    callback(null, result)
                 });
         },
         createOrUpdateVote: function(vote, callback) {
