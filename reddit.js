@@ -184,7 +184,7 @@ module.exports = function RedditAPI(conn) {
                     //get all comments for given postId
                     that.getCommentsForPost(postId, function(err, commentResult) {
                         if (err) {
-                            callback(null, results);
+                            callback(results);
                         }
                         else {
                             //push result from comments getCommentsForPost to result from getSinglePost
