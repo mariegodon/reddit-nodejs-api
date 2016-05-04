@@ -1,5 +1,6 @@
 var bcrypt = require('bcrypt');
 var HASH_ROUNDS = 10;
+var secureRandom = require('secure-random');
 
 module.exports = function RedditAPI(conn) {
     return {
@@ -184,7 +185,7 @@ module.exports = function RedditAPI(conn) {
                     //get all comments for given postId
                     that.getCommentsForPost(postId, function(err, commentResult) {
                         if (err) {
-                            callback(results);
+                            callback(null, results);
                         }
                         else {
                             //push result from comments getCommentsForPost to result from getSinglePost
@@ -376,7 +377,51 @@ module.exports = function RedditAPI(conn) {
             else {
                 callback(new Error("Vote must be 1, -1, or 0."));
             }
-        }
+        },
+        checkLogin: function(username, password, callback) {
+            conn.query(`SELECT * FROM users WHERE username = ?`, [username],
+                function(err, result) {
+                    if (err) {
+                        callback(new Error('Username or password is incorrect'));
+                    }
+                    else {
+                        var user = result[0];
+                        bcrypt.compare(password, user.password, function(err, same) {
+                            if (same === true) {
+                                callback(null, user)
+                            }
+                            else {
+                                callback(new Error('Username or password is incorrect'));
+                            }
+                        });
+                    }
+                });
+        },
+        createSession: function(userId, callback) {
+            var token = createSessionToken();
+            conn.query(`INSERT INTO sessions SET userId = ?, token = ?`, [userId, token],
+                function(err, result) {
+                    if (err) {
+                        callback(err);
+                    }
+                    else {
+                        callback(null, token);
+                    }
+                });
+        },
+    getUserForCookie(token, callback){
+        conn.query(`SELECT u.id, u.username, u.createdAt, u.updatedAt FROM sessions s 
+        LEFT JOIN users u ON s.userId = u.id WHERE s.token = ?`,
+        [token],
+        function(err, user){
+            if (err){
+                callback(err);
+            } else {
+                callback(null, user);
+            }
+        })
+    }
+        
     }
 }
 
@@ -445,4 +490,8 @@ function getQueryForSorting(sortingMethod) {
                 LIMIT ? OFFSET ?`
 
     return query;
+}
+
+function createSessionToken() {
+    return secureRandom.randomArray(100).map(code => code.toString(36)).join('');
 }

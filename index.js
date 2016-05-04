@@ -23,12 +23,30 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 
+var cookieParser = require('cookie-parser');
+app.use(cookieParser());
+
 // Boilerplate code to start up the web server
 var server = app.listen(process.env.PORT, process.env.IP, function() {
     var host = server.address().address;
     var port = server.address().port;
 
     console.log('Example app listening at http://%s:%s', host, port);
+});
+
+//middleware to check cookie
+app.use(function(req, res, next){
+    if (req.cookies.token) {
+        console.log(req.cookies.token);
+        redditAPI.getUserForCookie(req.cookies.token, function(err, user){
+            if(user) {
+            req.loggedInUser = user[0];
+            }
+            next();
+        });
+    } else {
+        next();
+    }
 });
 
 //get sorted homepage
@@ -71,7 +89,7 @@ app.post('/signup', function(req, res){
         password: req.body.password
     }, function(err, newUser){
         if (err) {
-            res.status(400).send('Try another username and password!');
+            res.status(400).send('Try another username!');
         } else {
             res.redirect('../login');
         }
@@ -93,7 +111,20 @@ app.get('/login', function(req, res) {
 });
 
 app.post('/login', function(req, res){
-    
+    redditAPI.checkLogin(req.body.username, req.body.password, function(err, user){
+        if (err) {
+            res.status(400).send('Username or password is incorrect');
+        } else {
+            redditAPI.createSession(user.id, function(err, token){
+                if (err) {
+                    res.status(500).send('Uh oh! Something went wrong.. try again later');
+                } else {
+                    res.cookie('token', token);
+                    res.redirect('../');
+                }
+            });
+        }
+    });
 })
 
 //create post page
@@ -110,6 +141,32 @@ app.get('/createPost', function (req,res){
 });
 
 app.post('/createPost', function(req, res){
-    
-})
+    if (!req.loggedInUser){
+        res.status(401).send('Sign in to create a post!')
+    } else{
+    redditAPI.createPost({
+        //for now default user
+        userId: req.loggedInUser.id,
+        title: req.body.title,
+        url: req.body.url
+        //add subreddit later
+    }, function(err, newPost){
+        if (err) {
+            res.status(500).send('Uh oh! Something went wrong.. try again later');
+        } else {
+            res.redirect(`../posts/${JSON.stringify(newPost.id)}`);
+        }
+    });
+    }
+});
 
+app.get('/posts/:postId', function(req, res){
+    var postId = Number(req.params.postId);
+    redditAPI.getSinglePost(postId, function(err, post){
+        if (err){
+            res.status(400).send('Post does not exist!');
+        } else {
+            res.send(post);
+        }
+    });
+});

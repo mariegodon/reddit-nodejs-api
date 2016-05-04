@@ -130,3 +130,8 @@ postId FROM votes GROUP BY postId ORDER BY controversy DESC;
 
 SELECT if(SUM(vote) > 0, COUNT(*) * (up/down), COUNT(*)*(down/up))
                
+CREATE TABLE sessions (userId INT,
+  FOREIGN KEY (userID) REFERENCES users(id),
+  token VARCHAR(255));
+  
+SELECT u.id, u.username, u.createdAt, u.updatedAt FROM sessions s LEFT JOIN users u ON s.userId = u.id;
