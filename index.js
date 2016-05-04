@@ -2,6 +2,11 @@
 var mysql = require('mysql');
 var util = require('util');
 var moment = require('moment');
+var emoji = require('node-emoji');
+var React = require('react');
+var ReactDOM = require('react-dom');
+var render = require('react-dom/server').renderToStaticMarkup;
+
 
 // create a connection to our Cloud9 server
 var connection = mysql.createConnection({
@@ -66,51 +71,52 @@ app.get('/', function(req, res) {
             res.status(500).send('Uh oh! Something went wrong.. try again later');
         }
         else {
-            res.send(postsInHTML(sortedPosts));
+            //res.send(postsInHTML(sortedPosts));
+            var htmlHomepage = PostsInHTML(sortedPosts);
+            var htmlHomepageRendered = render(htmlHomepage);
+            res.send(htmlHomepageRendered);
         }
     })
 })
 
+app.get('/vote', function(req, res) {
+    res.redirect('../');
+})
+
 app.post('/vote', function(req, res) {
-    redditAPI.createOrUpdateVote({
-        vote: Number(req.body.vote),
-        postId: Number(req.body.postId),
-        userId: req.loggedInUser.id
-    }, function(err, voted) {
-        if (err) {
-            res.status(401).send('Uh oh, make sure you\'re logged in to vote');
-        }
-        else {
-            redditAPI.getSinglePost(voted[0].postId, function(err, post) {
-                if (err) {
-                    res.status(500).send('Uh oh! Something went wrong.. try again later')
-                }
-                else {
-                    if (Number(req.body.vote) === -1) {
-                        var voteValue = "down";
+    if (!req.loggedInUser) {
+        res.status(401).send('Uh oh, make sure you\'re <a href = "../login">logged in</a> to vote');
+    }
+    else {
+        redditAPI.createOrUpdateVote({
+            vote: Number(req.body.vote),
+            postId: Number(req.body.postId),
+            userId: req.loggedInUser.id
+        }, function(err, voted) {
+            if (err) {
+                res.status(500).send('Uh oh! Something went wrong.. try again later');
+            }
+            else {
+                redditAPI.getSinglePost(voted[0].postId, function(err, post) {
+                    if (err) {
+                        res.status(500).send('Uh oh! Something went wrong.. try again later');
                     }
                     else {
-                        voteValue = "up";
+                        if (Number(req.body.vote) === -1) {
+                            var voteValue = "down";
+                        }
+                        else {
+                            voteValue = "up";
+                        }
+                        var htmlVotepage = VotePage(voteValue, post);
+                        var htmlVotepageRendered = render(htmlVotepage);
+                        res.send(htmlVotepageRendered);
                     }
-                    //format comments part!!
-                    // if (post[1]) {
-                    //     var comments = "comments:" + JSON.stringify(post[1]);
-                    // }
-                    // else {
-                    //     comments = '';
-                    // }
-                    res.send(`<h1>Yay. You ${voteValue}-voted this post.</h1><br>
-                    <h2>${post[0].title}</h2>
-                    <p>author: ${post[0].userId}<br>
-                        url: ${post[0].url}</br>
-                        score: ${post[0].score}<br>
-                        created: ${moment(post[0].createdAt).fromNow()} </br>
-                    </p>`);
-                }
 
-            });
-        }
-    })
+                });
+            }
+        })
+    }
 })
 
 //signup page
@@ -217,68 +223,99 @@ app.get('/posts/:postId', function(req, res) {
             res.status(400).send('Post does not exist!');
         }
         else {
-            res.send(post);
+            var htmlPost = SinglePost(post[0]);
+            var htmlPostRender = render(htmlPost);
+            if (post[1]) {
+                var htmlComments = CommentList(post[1]);
+                var htmlCommentsRendered = render(htmlComments);
+                res.send(htmlPostRender + htmlCommentsRendered);
+            }
+            else {
+                res.send(htmlPostRender);
+            }
         }
     });
 });
 
-function postsInHTML(result) {
-    var htmlPosts = `<div> <h1>List of Posts</h1> <ul>`;
-    result.forEach(function(post) {
-        var thisPostHtml =
-            `<li>
-            <h4>${post.title}</h4>
-                <p>user: ${post.user.username} <br>
-                    url: ${post.url} <br>
-                    id: ${post.id} <br>
-                    created: ${moment(post.createdAt).fromNow()} <br>
-                </p>
-                <form action="/vote" method="post">
-                <input type="hidden" name="vote" value="1">
-                <input type="hidden" name="postId" value=${post.id}>
-                <button type="submit">upvote this</button>
-                </form>
-                <form action="/vote" method="post">
-                <input type="hidden" name="vote" value="-1">
-                <input type="hidden" name="postId" value=${post.id}>
-                <button type="submit">downvote this</button>
-                </form>
-        </li>`;
-        htmlPosts += thisPostHtml;
-    });
-    return (`${htmlPosts}</ul></h1></div>`);
+//------------Functions-----------------
+
+function PostsInHTML(result) {
+    return (
+        <div>
+            <h1>List of Posts</h1>
+                <ul>
+                {result.map(function(post){
+                    var postRedirect = `../posts/${post.id}`; 
+                    return(
+                    <li>
+                    <h2><a href = {postRedirect}>{post.title}</a></h2>
+                    <p>user: {post.user.username} <br />
+                    url: {post.url} <br />
+                    created: {moment(post.createdAt).fromNow()} <br />
+                    </p>
+                    <form action="/vote" method="post" >
+                    <input type="hidden" name="vote" value="1" />
+                    <input type="hidden" name="postId" value={post.id} />
+                    <button type="submit">upvote this</button>
+                    </form>
+                    <form action="/vote" method="post">
+                    <input type="hidden" name="vote" value="-1" />
+                    <input type="hidden" name="postId" value={post.id} />
+                    <button type="submit">downvote this</button>
+                    </form>
+                    </li>
+                    )
+                    })
+                }
+                </ul>
+        </div>
+    )
 }
 
-// function commentsInHtml(commentObj){
-//     var commentHtml = `<h3>Comments</h3><ul>`
-//     commentObj.forEach(comment){
-//         var thisCommentHtml = `
-//         <li>
-//         <h2>${comment.text}<h2><br>
-        
-//     }
-// }
-// //create new comments in final array
-// function newComment(currObj, level) {
-//     var newCommentObj = {};
-//     newCommentObj.id = currObj[`${level}Id`];
-//     newCommentObj.text = currObj[`${level}Text`];
-//     newCommentObj.createdAt = currObj[`${level}CreatedAt`];
-//     newCommentObj.updatedAt = currObj[`${level}UpdatedAt`];
-//     newCommentObj.username = currObj[`${level}UserName`];
-//     //if this is a parent level comment, check if it has a c1 and add it
-//     if (level === "parent") {
-//         if (currObj.c1Id) {
-//             newCommentObj.replies = [];
-//             newCommentObj.replies.push(newComment(currObj, "c1"));
-//         }
-//     }
-//     //if this is a c1 level comment, check if it has a c2 and add it
-//     if (level === "c1") {
-//         if (currObj.c2Id) {
-//             newCommentObj.replies = [];
-//             newCommentObj.replies.push(newComment(currObj, "c2"));
-//         }
-//     }
-//     return newCommentObj;
-// }
+function CommentList(comments) {
+    return (
+        <ul>
+            {comments.map(SingleComment)}
+        </ul>
+    )
+}
+
+function SingleComment(comment) {
+    return (
+        <li>
+        <h2>{comment.text}</h2>
+        <p>user: {comment.username}<br />
+        created: {moment(comment.createdAt).fromNow()}
+        </p>
+        {comment.replies ? CommentList(comment.replies) : null}
+        </li>
+    )
+}
+
+function SinglePost(post) {
+    return (
+        <div className = 'post'>
+        <h1>{post.title}</h1>
+        <p>user: {post.userId} <br />
+        url: {post.url} <br />
+        created: {moment(post.createdAt).fromNow()} <br />
+        score: {post.score} 
+        </p>
+        </div>
+    )
+}
+
+function VotePage(voteValue, post) {
+    return (
+        <div className = 'voted'>
+            <h1>Yay. You {voteValue}-voted this post.</h1><br />
+            <h2>{post[0].title}</h2>
+            <p>author: {post[0].userId}<br />
+                url: {post[0].url}<br />
+                score: {post[0].score}<br />
+                created: {moment(post[0].createdAt).fromNow()} <br />
+            </p>
+            <p><a href = '../'> home </a></p>
+        </div>
+    )
+}

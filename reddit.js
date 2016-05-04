@@ -410,19 +410,18 @@ module.exports = function RedditAPI(conn) {
                     }
                 });
         },
-    getUserForCookie(token, callback){
-        conn.query(`SELECT u.id, u.username, u.createdAt, u.updatedAt FROM sessions s 
-        LEFT JOIN users u ON s.userId = u.id WHERE s.token = ?`,
-        [token],
-        function(err, user){
-            if (err){
-                callback(err);
-            } else {
-                callback(null, user);
-            }
-        })
-    }
-        
+        getUserForCookie(token, callback){
+            conn.query(`SELECT u.id, u.username, u.createdAt, u.updatedAt FROM sessions s 
+            LEFT JOIN users u ON s.userId = u.id WHERE s.token = ?`,
+            [token],
+            function(err, user){
+                if (err){
+                    callback(err);
+                } else {
+                    callback(null, user);
+                }
+            });
+        }
     }
 }
 
@@ -492,6 +491,16 @@ function getQueryForSorting(sortingMethod) {
 
     return query;
 }
+
+// function addShit(toDisplay){
+//     `<head>
+//         <link>
+//     </head>
+//     <body>
+//         ${toDisplay}
+//     </body>
+//     `
+// }
 
 function createSessionToken() {
     return secureRandom.randomArray(100).map(code => code.toString(36)).join('');
