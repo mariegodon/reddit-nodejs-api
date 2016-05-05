@@ -6,6 +6,9 @@ var emoji = require('node-emoji');
 var React = require('react');
 var ReactDOM = require('react-dom');
 var render = require('react-dom/server').renderToStaticMarkup;
+var express = require('express');
+var app = express();
+app.use(express.static('css'));
 
 
 // create a connection to our Cloud9 server
@@ -20,8 +23,8 @@ var connection = mysql.createConnection({
 var reddit = require('./reddit');
 var redditAPI = reddit(connection);
 
-var express = require('express');
-var app = express();
+
+
 
 var bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({
@@ -74,7 +77,7 @@ app.get('/', function(req, res) {
             //res.send(postsInHTML(sortedPosts));
             var htmlHomepage = PostsInHTML(sortedPosts);
             var htmlHomepageRendered = render(htmlHomepage);
-            res.send(htmlHomepageRendered);
+            res.send(addStyle(htmlHomepageRendered));
         }
     })
 })
@@ -237,22 +240,24 @@ app.get('/posts/:postId', function(req, res) {
     });
 });
 
-//------------Functions-----------------
+//------------JSX Functions-----------------
 
 function PostsInHTML(result) {
     return (
-        <div>
+        <div className = 'listOfPosts'>
             <h1>List of Posts</h1>
                 <ul>
                 {result.map(function(post){
                     var postRedirect = `../posts/${post.id}`; 
                     return(
                     <li>
+                    <div className = 'info'>
                     <h2><a href = {postRedirect}>{post.title}</a></h2>
-                    <p>user: {post.user.username} <br />
+                    user: {post.user.username} <br />
                     url: {post.url} <br />
                     created: {moment(post.createdAt).fromNow()} <br />
-                    </p>
+                    </div>
+                    <div className = 'voting'>
                     <form action="/vote" method="post" >
                     <input type="hidden" name="vote" value="1" />
                     <input type="hidden" name="postId" value={post.id} />
@@ -263,6 +268,7 @@ function PostsInHTML(result) {
                     <input type="hidden" name="postId" value={post.id} />
                     <button type="submit">downvote this</button>
                     </form>
+                    </div>
                     </li>
                     )
                     })
@@ -296,7 +302,7 @@ function SinglePost(post) {
     return (
         <div className = 'post'>
         <h1>{post.title}</h1>
-        <p>user: {post.userId} <br />
+        <p>user: {post.username} <br />
         url: {post.url} <br />
         created: {moment(post.createdAt).fromNow()} <br />
         score: {post.score} 
@@ -310,7 +316,7 @@ function VotePage(voteValue, post) {
         <div className = 'voted'>
             <h1>Yay. You {voteValue}-voted this post.</h1><br />
             <h2>{post[0].title}</h2>
-            <p>author: {post[0].userId}<br />
+            <p>user: {post[0].username}<br />
                 url: {post[0].url}<br />
                 score: {post[0].score}<br />
                 created: {moment(post[0].createdAt).fromNow()} <br />
@@ -318,4 +324,26 @@ function VotePage(voteValue, post) {
             <p><a href = '../'> home </a></p>
         </div>
     )
+}
+
+//------------Function linking CSS-----------------
+
+function addStyle(someHTML) {
+    return `
+        <head>
+        <title>RedditClone</title>
+        <link rel='stylesheet' href='style.css' type = 'text/css' />
+        <link href='https://fonts.googleapis.com/css?family=Work+Sans:400,100' rel='stylesheet' type='text/css'>
+        </head>
+        <body>
+        <div class = 'navbar'>
+        <div>home</div>
+        <div>sort</div>
+        <div>create post</div>
+        <div>login</div>
+        </div>
+        <div class = 'title'><h1>RedditClone.</h1></div>
+        ${someHTML}
+        </body>
+    `
 }

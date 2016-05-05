@@ -1,0 +1,61 @@
+body {
+  font-family: 'Work sans';
+  padding: 0;
+  margin: 0; }
+  body .title {
+    color: #FFEE06;
+    font-size: 2em;
+    width: 100%;
+    text-align: center;
+    font-weight: 100; }
+  body .navbar {
+    width: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: flex-end;
+    background-color: #7115D3;
+    font-size: 1em;
+    color: #FFFAB3;
+    font-weight: 400;
+    position: fixed;
+    top: 0; }
+    body .navbar div {
+      padding: 1em; }
+    body .navbar div:hover {
+      background-color: #D6B5FA; }
+
+.listOfPosts h1 {
+  display: none; }
+.listOfPosts ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  width: 100%; }
+.listOfPosts li {
+  display: flex;
+  justify-content: flex-end;
+  flex-direction: row-reverse;
+  align-items: center;
+  text-align: center;
+  background-color: #D6B5FA;
+  padding: 1em;
+  margin-top: 2em;
+  margin-bottom: 2em; }
+  .listOfPosts li a {
+    text-decoration: none;
+    color: #7115D3; }
+  .listOfPosts li a:hover {
+    color: #FFEE06;
+    text-decoration: underline; }
+  .listOfPosts li .voting {
+    margin-left: 10%;
+    margin-right: 10%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around; }
+    .listOfPosts li .voting button {
+      vertical-align: middle;
+      display: block;
+      margin: 0; }
+
+/*# sourceMappingURL=style.css.map */

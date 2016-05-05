@@ -1,0 +1,100 @@
+//http://paletton.com/#uid=7430u0klfTY9BZ4g3WEq0QcvjK8
+
+body {
+    //background: #7066EE;
+    //background-color: #BEBAFA;
+    font-family: 'Work sans';
+    padding: 0;
+    margin: 0;
+    
+    .title {
+        color: #FFEE06;
+        font-size: 2em;
+        width: 100%;
+        text-align: center;
+        font-weight: 100;
+    }
+
+//fix this top thing    
+    .navbar {
+        width: 100%;
+        margin: 0;
+        display: flex;
+        justify-content: flex-end;
+        background-color: #7115D3;
+        font-size: 1em;
+        color: #FFFAB3;
+        font-weight: 400;
+        position: fixed;
+        top: 0;
+        
+        div{
+            padding: 1em;
+        }
+        
+        div:hover{
+            background-color: #D6B5FA;
+        }
+    }
+    
+}
+
+.listOfPosts {
+    h1 {
+        display: none;
+    }
+    
+    ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        //display: flex;
+        width: 100%;
+    }
+    
+    li {
+        display: flex;
+        justify-content: flex-end;
+        flex-direction: row-reverse;
+        align-items: center;
+        text-align: center;
+        background-color: #D6B5FA;
+        padding: 1em;
+        margin-top: 2em;
+        margin-bottom: 2em;
+        
+        // div {
+        //     margin-right: 10%;
+        //     margin-left: 10%;
+        // }
+        
+        a {
+            text-decoration: none;
+            color: #7115D3;
+        }
+        
+        a:hover {
+            color: #FFEE06;
+            text-decoration: underline;
+        }
+        
+        
+        .voting{
+            margin-left: 10%;
+            margin-right: 10%;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            
+            
+            button {
+            vertical-align: middle;
+            display: block;
+            margin: 0;
+            
+            }
+        }
+
+    }
+    
+}

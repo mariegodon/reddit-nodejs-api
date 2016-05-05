@@ -173,8 +173,8 @@ module.exports = function RedditAPI(conn) {
             //bind `this` for later use inside function
             var that = this;
             conn.query(`
-            SELECT p.id AS postID, p.url, p.userId, p.title, p.createdAt, p.updatedAt, SUM(v.vote) AS score 
-            FROM posts p LEFT JOIN votes v ON v.postId = p.id WHERE p.id = ? GROUP BY p.id
+            SELECT p.id AS postID, p.url, p.userId, p.title, p.createdAt, p.updatedAt, u.username, SUM(v.vote) AS score
+            FROM posts p LEFT JOIN votes v ON v.postId = p.id LEFT JOIN users u ON u.id = p.userId WHERE p.id = ? GROUP BY p.id
             `, [postId], function(err, results) {
                 if (err) {
                     callback(err);
@@ -270,7 +270,7 @@ module.exports = function RedditAPI(conn) {
             //second children identified as c2
             //perform inner queries to join usernames to comments
             conn.query(
-                `SELECT p.id AS parentId, p.text AS parentText, p.createdAt as parentCreatedAt, p.updatedAt AS parentUpdatedAt,
+            `SELECT p.id AS parentId, p.text AS parentText, p.createdAt as parentCreatedAt, p.updatedAt AS parentUpdatedAt,
             p.parentId AS parentParentId, p.userId AS parentUserId, p.username AS parentUserName, p.postId,
             c1.id AS c1Id, c1.text AS c1Text, c1.createdAt as c1CreatedAt, c1.updatedAt AS c1UpdatedAt,
             c1.parentId AS c1ParentId, c1.userId AS c1UserId, c1.username AS c1UserName,
@@ -491,16 +491,6 @@ function getQueryForSorting(sortingMethod) {
 
     return query;
 }
-
-// function addShit(toDisplay){
-//     `<head>
-//         <link>
-//     </head>
-//     <body>
-//         ${toDisplay}
-//     </body>
-//     `
-// }
 
 function createSessionToken() {
     return secureRandom.randomArray(100).map(code => code.toString(36)).join('');
