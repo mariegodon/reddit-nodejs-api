@@ -10,6 +10,8 @@ var express = require('express');
 var app = express();
 app.use(express.static('css'));
 
+//MY SHIT
+//var SignUp = require("./signup.js");
 
 // create a connection to our Cloud9 server
 var connection = mysql.createConnection({
@@ -74,7 +76,6 @@ app.get('/', function(req, res) {
             res.status(500).send('Uh oh! Something went wrong.. try again later');
         }
         else {
-            //res.send(postsInHTML(sortedPosts));
             var htmlHomepage = PostsInHTML(sortedPosts);
             var htmlHomepageRendered = render(htmlHomepage);
             res.send(addStyle(htmlHomepageRendered));
@@ -113,7 +114,7 @@ app.post('/vote', function(req, res) {
                         }
                         var htmlVotepage = VotePage(voteValue, post);
                         var htmlVotepageRendered = render(htmlVotepage);
-                        res.send(htmlVotepageRendered);
+                        res.send(addStyle(htmlVotepageRendered));
                     }
 
                 });
@@ -124,16 +125,10 @@ app.post('/vote', function(req, res) {
 
 //signup page
 app.get('/signup', function(req, res) {
-    res.sendFile('./signup.html', {
-        root: __dirname
-    }, function(err, result) {
-        if (err) {
-            res.status(500).send('Error!');
-        }
-        else {
-            return;
-        }
-    });
+
+    var htmlSignUpRender = render(SignUp());
+    res.send(addStyle(htmlSignUpRender));
+
 });
 
 app.post('/signup', function(req, res) {
@@ -152,16 +147,10 @@ app.post('/signup', function(req, res) {
 
 //login page
 app.get('/login', function(req, res) {
-    res.sendFile('./login.html', {
-        root: __dirname
-    }, function(err, result) {
-        if (err) {
-            res.status(500).send('Error!');
-        }
-        else {
-            return;
-        }
-    });
+    
+    var htmlLoginRender = render(LogIn());
+    res.send(addStyle(htmlLoginRender));
+    
 });
 
 app.post('/login', function(req, res) {
@@ -185,16 +174,10 @@ app.post('/login', function(req, res) {
 
 //create post page
 app.get('/createPost', function(req, res) {
-    res.sendFile('./createPost.html', {
-        root: __dirname
-    }, function(err, result) {
-        if (err) {
-            res.status(500).send('Error!');
-        }
-        else {
-            return;
-        }
-    });
+
+    var htmlPostRender = render(CreatePost());
+    res.send(addStyle(htmlPostRender));
+
 });
 
 app.post('/createPost', function(req, res) {
@@ -213,7 +196,7 @@ app.post('/createPost', function(req, res) {
                 res.status(500).send('Uh oh! Something went wrong.. try again later');
             }
             else {
-                res.redirect(`../posts/${JSON.stringify(newPost.id)}`);
+                res.redirect(`/posts/${JSON.stringify(newPost.id)}`);
             }
         });
     }
@@ -231,10 +214,10 @@ app.get('/posts/:postId', function(req, res) {
             if (post[1]) {
                 var htmlComments = CommentList(post[1]);
                 var htmlCommentsRendered = render(htmlComments);
-                res.send(htmlPostRender + htmlCommentsRendered);
+                res.send(addStyle(htmlPostRender + htmlCommentsRendered));
             }
             else {
-                res.send(htmlPostRender);
+                res.send(addStyle(htmlPostRender));
             }
         }
     });
@@ -251,23 +234,33 @@ function PostsInHTML(result) {
                     var postRedirect = `../posts/${post.id}`; 
                     return(
                     <li>
-                    <div className = 'info'>
+                    <div className = 'title'>
                     <h2><a href = {postRedirect}>{post.title}</a></h2>
+                    </div>
+                    <div className = 'info'>
                     user: {post.user.username} <br />
                     url: {post.url} <br />
                     created: {moment(post.createdAt).fromNow()} <br />
                     </div>
+                    <div className = 'placeKitten'>
+                    <img src="http://placekitten.com/125/125" />
+                    </div>
                     <div className = 'voting'>
+                    <div className = 'upVote'>
                     <form action="/vote" method="post" >
                     <input type="hidden" name="vote" value="1" />
                     <input type="hidden" name="postId" value={post.id} />
-                    <button type="submit">upvote this</button>
+                    <button type="submit"><span>upvote this</span></button>
                     </form>
+                    <div id = 'voteScore'>{post.voteScore}</div>
+                    </div>
+                    <div className = 'downVote'>
                     <form action="/vote" method="post">
                     <input type="hidden" name="vote" value="-1" />
                     <input type="hidden" name="postId" value={post.id} />
-                    <button type="submit">downvote this</button>
+                    <button type="submit"><span>downvote this</span></button>
                     </form>
+                    </div>
                     </div>
                     </li>
                     )
@@ -326,24 +319,87 @@ function VotePage(voteValue, post) {
     )
 }
 
+function SignUp() {
+    return (
+        <form action="/signup" method="POST">
+            <p>Create a username and password</p>
+            <div>
+                <input type="text" name="username" placeholder="username" />
+            </div>
+            <div>
+                <input type="password" name="password" placeholder="password" />
+            </div>
+            <button type="submit">Create account!</button>
+        </form>
+    )
+}
+
+function LogIn(){
+    return (
+    <form action="/login" method="POST">
+        <p>Enter your username and password</p>
+        <div>
+            <input type="text" name="username" placeholder="username" />
+        </div>
+        <div>
+            <input type="password" name="password" placeholder="password" />
+        </div>
+        <button type="submit">Sign in!</button>
+    </form>
+    )
+}
+
+function CreatePost(){
+    return (
+    <form action="/createPost" method="POST">
+        <p>Post</p>
+        <div>
+            <input type="text" name="title" placeholder="title"/>
+        </div>
+        <div>
+            <input type="text" name="url" placeholder="url"/>
+        </div>
+        <button type="submit">Create post!</button>
+    </form>
+    )
+}
+
 //------------Function linking CSS-----------------
 
 function addStyle(someHTML) {
     return `
         <head>
         <title>RedditClone</title>
-        <link rel='stylesheet' href='style.css' type = 'text/css' />
+        <link rel='stylesheet' href='../style.css' type = 'text/css' />
         <link href='https://fonts.googleapis.com/css?family=Work+Sans:400,100' rel='stylesheet' type='text/css'>
         </head>
         <body>
-        <div class = 'navbar'>
-        <div>home</div>
-        <div>sort</div>
-        <div>create post</div>
-        <div>login</div>
+        <div class = 'header'>
+            <div class = 'navbar'>
+                <div class = 'login' class='menuItem'><span class = 'dropbtn'>sort</span>
+                    <div class="dropdown-content">
+                    <a href="/?sort=hot">hot</a>
+                    <a href="/?sort=top">top</a>                    
+                    <a href="/?sort=controversial">controversial</a>
+                    </div>                
+                </div>
+                <div class = 'rightNav'>
+                    <div class='menuItem'><a href = "/">home</a></div>
+                    <div class='menuItem'><a href = "/createPost">create post</a></div>
+                    <div class = 'login' class='menuItem'><span class = 'dropbtn'>login</span>
+                        <div class="dropdown-content">
+                        <a href="/login">login</a>
+                        <a href="/signup">signup</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class = 'pageTitle'><h1>RedditClone.</h1></div>
         </div>
-        <div class = 'title'><h1>RedditClone.</h1></div>
+        <div class = 'varContent'>
         ${someHTML}
+        </div>
         </body>
     `
 }
+

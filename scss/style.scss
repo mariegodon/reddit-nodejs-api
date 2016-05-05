@@ -1,13 +1,15 @@
 //http://paletton.com/#uid=7430u0klfTY9BZ4g3WEq0QcvjK8
 
+$darkPurple: #7115D3;
+$darkYellow: #FFEE06;
+$lightPurple: #D6B5FA;
+
 body {
-    //background: #7066EE;
-    //background-color: #BEBAFA;
     font-family: 'Work sans';
     padding: 0;
     margin: 0;
     
-    .title {
+    .pageTitle {
         color: #FFEE06;
         font-size: 2em;
         width: 100%;
@@ -15,28 +17,90 @@ body {
         font-weight: 100;
     }
 
-//fix this top thing    
     .navbar {
         width: 100%;
         margin: 0;
         display: flex;
-        justify-content: flex-end;
-        background-color: #7115D3;
+        justify-content: space-between;
+        background-color: $darkPurple;
         font-size: 1em;
-        color: #FFFAB3;
+        color: $darkYellow;
         font-weight: 400;
-        position: fixed;
-        top: 0;
         
-        div{
+        
+        .menuItem {
             padding: 1em;
         }
         
-        div:hover{
+        .menuItem:hover{
             background-color: #D6B5FA;
         }
+        
+        .rightNav {
+            display: flex;
+            justtify-contetn: flex-end;
+        }
+        
+    //dropbutton functionality
+        .dropbtn {
+            padding: 1em;
+            display: block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #FFF67F;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            //right: 0;
+        }
+        
+        .rightNav .dropdown-content {
+            right: 0;
+            text-align: right;
+        }
+
+        .dropdown-content a {
+            color: $darkPurple;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .dropdown-content a:hover {
+            background-color: $lightPurple
+        }
+
+        .login:hover .dropdown-content {
+            background-color: $darkYellow;
+            display: block;
+        }
+
+        .login:hover .dropbtn {
+            background-color: $lightPurple;
+        }
+        
+        
+        .login {
+            position: relative;
+            display: inline-block;
+            padding: 0;
+        
+            .dropdown-content{
+                padding: 0;
+            }
+        }
+        
+        a {
+            text-decoration: none;
+            color: $darkYellow;
+        }
+        
     }
-    
+}
+
+.varContent {
+    margin-top: 212px;
 }
 
 .listOfPosts {
@@ -48,7 +112,6 @@ body {
         list-style-type: none;
         padding: 0;
         margin: 0;
-        //display: flex;
         width: 100%;
     }
     
@@ -57,17 +120,11 @@ body {
         justify-content: flex-end;
         flex-direction: row-reverse;
         align-items: center;
-        text-align: center;
         background-color: #D6B5FA;
         padding: 1em;
         margin-top: 2em;
         margin-bottom: 2em;
-        
-        // div {
-        //     margin-right: 10%;
-        //     margin-left: 10%;
-        // }
-        
+
         a {
             text-decoration: none;
             color: #7115D3;
@@ -78,23 +135,78 @@ body {
             text-decoration: underline;
         }
         
+        .info {
+            text-align: left;
+            color: white;
+        }
+        
+        .title {
+            text-align: left;
+            margin-left: 6%;
+            font-size: 1.2em;
+        }
+        
         
         .voting{
-            margin-left: 10%;
-            margin-right: 10%;
+            margin-left: 6%;
+            margin-right: 6%;
             display: flex;
-            flex-direction: row;
-            justify-content: space-around;
+            flex-direction: column;
+            justify-content: center;
             
+            #voteScore {
+                text-align: center;
+                width: 50px;
+                color: $darkPurple;
+            }
+            
+            .downVote  {
+                
+                button {
+                    transform: rotate(180deg);
+                }
+            }
             
             button {
-            vertical-align: middle;
-            display: block;
-            margin: 0;
+                background-image: url(http://chinagroups.ru/wp-content/themes/1ps-template/img/on-top.png);
+                background-repeat: no-repeat;
+                background-position: 50% 50%;
+                background-size: contain;
+                border-radius: 50%;
+                /* put the height and width of your image here */
+                height: 50px;
+                width: 50px;
+                border: none;
+                margin-top: 15px;
+                
+                span {
+                    display: none;
+                }
+                
+            }
             
+        }
+        
+        .placeKitten {
+            height: 125px;
+            width: 125px;
+            margin-right: 6%;
+            
+            img {
+            border-radius: 20px;
+            -webkit-filter: grayscale(100%);
             }
         }
 
     }
-    
 }
+
+.header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: white;
+    z-index: 999;
+}
+
+

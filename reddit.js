@@ -456,23 +456,23 @@ function getQueryForSorting(sortingMethod) {
     var extraQuery = "";
     var extraJoin = "";
     var orderBy = "p.createdAt";
-    var groupBy = "";
+    var groupBy = "GROUP BY p.id";
     if (sortingMethod) {
         if (sortingMethod === "top") {
-            extraQuery = ", SUM(v.vote) AS voteScore";
-            extraJoin = "LEFT JOIN votes v ON v.postId = p.id";
+            extraQuery = "";
+            extraJoin = "";
             orderBy = "voteScore";
             groupBy = "GROUP BY p.id"
         }
         else if (sortingMethod === "hot" || sortingMethod === "hotness") {
             extraQuery = ", SUM(v.vote)/(NOW()-v.createdAt) AS hotness";
-            extraJoin = "LEFT JOIN votes v ON v.postId = p.id WHERE v.vote = 1";
+            extraJoin = " WHERE v.vote = 1";
             orderBy = "hotness";
             groupBy = "GROUP BY p.id"
         }
         else if (sortingMethod === "controversial") {
             extraQuery = ", if(SUM(vote) < 0, COUNT(*) * (sum(if(vote >0, 1, 0))/sum(if(vote<0, 1, 0))), (COUNT(*) * (sum(if(vote<0, 1, 0))/(sum(if(vote >0, 1, 0)))))) as controversyScore";
-            extraJoin = "LEFT JOIN votes v ON v.postId = p.id";
+            extraJoin = "";
             orderBy = "controversyScore";
             groupBy = "GROUP BY p.id"
         }
@@ -481,9 +481,10 @@ function getQueryForSorting(sortingMethod) {
     var query = `SELECT p.id, p.title, p.url, p.userId, p.createdAt, p.updatedAt, 
                 u.id AS userId, u.username AS userUsername, u.createdAt AS userCreatedAt, u.updatedAt AS userUpdatedAt,
                 s.id AS subredditId, s.name AS subredditName, s.description AS subredditDescription, 
-                s.createdAt AS subredditCreatedAt, s.updatedAt AS subredditUpdatedAt
+                s.createdAt AS subredditCreatedAt, s.updatedAt AS subredditUpdatedAt, SUM(v.vote) AS voteScore
                 ${extraQuery}
                 FROM posts p JOIN users u ON p.userId = u.id LEFT JOIN subreddits s ON s.id = p.subredditId
+                LEFT JOIN votes v ON v.postId = p.id
                 ${extraJoin}
                 ${groupBy}
                 ORDER BY ${orderBy} DESC

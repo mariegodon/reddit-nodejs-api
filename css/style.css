@@ -2,7 +2,7 @@ body {
   font-family: 'Work sans';
   padding: 0;
   margin: 0; }
-  body .title {
+  body .pageTitle {
     color: #FFEE06;
     font-size: 2em;
     width: 100%;
@@ -12,17 +12,53 @@ body {
     width: 100%;
     margin: 0;
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     background-color: #7115D3;
     font-size: 1em;
-    color: #FFFAB3;
-    font-weight: 400;
-    position: fixed;
-    top: 0; }
-    body .navbar div {
+    color: #FFEE06;
+    font-weight: 400; }
+    body .navbar .menuItem {
       padding: 1em; }
-    body .navbar div:hover {
+    body .navbar .menuItem:hover {
       background-color: #D6B5FA; }
+    body .navbar .rightNav {
+      display: flex;
+      justtify-contetn: flex-end; }
+    body .navbar .dropbtn {
+      padding: 1em;
+      display: block; }
+    body .navbar .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #FFF67F;
+      box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2); }
+    body .navbar .rightNav .dropdown-content {
+      right: 0;
+      text-align: right; }
+    body .navbar .dropdown-content a {
+      color: #7115D3;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block; }
+    body .navbar .dropdown-content a:hover {
+      background-color: #D6B5FA; }
+    body .navbar .login:hover .dropdown-content {
+      background-color: #FFEE06;
+      display: block; }
+    body .navbar .login:hover .dropbtn {
+      background-color: #D6B5FA; }
+    body .navbar .login {
+      position: relative;
+      display: inline-block;
+      padding: 0; }
+      body .navbar .login .dropdown-content {
+        padding: 0; }
+    body .navbar a {
+      text-decoration: none;
+      color: #FFEE06; }
+
+.varContent {
+  margin-top: 212px; }
 
 .listOfPosts h1 {
   display: none; }
@@ -36,7 +72,6 @@ body {
   justify-content: flex-end;
   flex-direction: row-reverse;
   align-items: center;
-  text-align: center;
   background-color: #D6B5FA;
   padding: 1em;
   margin-top: 2em;
@@ -47,15 +82,51 @@ body {
   .listOfPosts li a:hover {
     color: #FFEE06;
     text-decoration: underline; }
+  .listOfPosts li .info {
+    text-align: left;
+    color: white; }
+  .listOfPosts li .title {
+    text-align: left;
+    margin-left: 6%;
+    font-size: 1.2em; }
   .listOfPosts li .voting {
-    margin-left: 10%;
-    margin-right: 10%;
+    margin-left: 6%;
+    margin-right: 6%;
     display: flex;
-    flex-direction: row;
-    justify-content: space-around; }
+    flex-direction: column;
+    justify-content: center; }
+    .listOfPosts li .voting #voteScore {
+      text-align: center;
+      width: 50px;
+      color: #7115D3; }
+    .listOfPosts li .voting .downVote button {
+      transform: rotate(180deg); }
     .listOfPosts li .voting button {
-      vertical-align: middle;
-      display: block;
-      margin: 0; }
+      background-image: url(http://chinagroups.ru/wp-content/themes/1ps-template/img/on-top.png);
+      background-repeat: no-repeat;
+      background-position: 50% 50%;
+      background-size: contain;
+      border-radius: 50%;
+      /* put the height and width of your image here */
+      height: 50px;
+      width: 50px;
+      border: none;
+      margin-top: 15px; }
+      .listOfPosts li .voting button span {
+        display: none; }
+  .listOfPosts li .placeKitten {
+    height: 125px;
+    width: 125px;
+    margin-right: 6%; }
+    .listOfPosts li .placeKitten img {
+      border-radius: 20px;
+      -webkit-filter: grayscale(100%); }
+
+.header {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background: white;
+  z-index: 999; }
 
 /*# sourceMappingURL=style.css.map */
