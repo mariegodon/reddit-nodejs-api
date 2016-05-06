@@ -167,7 +167,7 @@ body {
         .title {
             text-align: left;
             margin-left: 6%;
-            font-size: 1.2em;
+            font-size: 1.5em;
         }
         
         
@@ -247,11 +247,12 @@ body {
     h1 {
         color: $darkPurple;
         margin-left: 6%;
+        font-size: 2.25em;
     }
     
     p {
         color: white;
-        margin-left: 6%;
+        width: 225;
     }
     
     .placeKitten {
@@ -380,7 +381,7 @@ body {
             border: none;
             font-size: 0.7em;
             color: $darkPurple;
-            border-radius: 10px;
+            border-radius: 8px;
             border: 2px solid $darkPurple;
             margin-top: 10px;
             min-width:  140px;
@@ -402,3 +403,35 @@ body {
     color: $darkPurple;
     font-size: 1.5em;
 }
+
+//----------------spinning animation----------------
+
+#animation {
+    display: flex;
+    flex-direction: column;
+    
+        perspective: 200px;
+            transform-style: preserve-3d;
+                align-items: center;
+    justify-content: center;
+}
+
+#antenna {
+    margin-left: 80px;
+    transform-origin: 25% center;
+    animation: infinite-spinning 2s infinite;
+    top: 4px;
+    position: relative;
+    
+}
+
+@-webkit-keyframes infinite-spinning {
+
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(360deg);
+  }
+}
+

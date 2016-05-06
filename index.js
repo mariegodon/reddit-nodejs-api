@@ -87,9 +87,7 @@ app.get('/', function(req, res) {
         }
         else {
             var htmlHomepage = toHTML.PostsInHTML(sortedPosts);
-            console.log(htmlHomepage);
             var htmlHomepageRendered = render(htmlHomepage);
-            console.log(htmlHomepageRendered);
             res.send(toHTML.addStyle(htmlHomepageRendered, req, req.message));
         }
     })

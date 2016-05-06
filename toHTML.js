@@ -230,6 +230,10 @@ function addStyle(someHTML, req, welcomeUser) {
         <div class = 'varContent'>
         ${someHTML}
         </div>
+        <div id = 'animation'>
+        <img src='/reddit-ant.png'/ id = 'antenna'>
+        <img src='/Reddit-Icon.png'/>
+        </div>
         </body>
     `
 }
