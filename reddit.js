@@ -424,6 +424,17 @@ module.exports = function RedditAPI(conn) {
                     callback(null, user);
                 }
             });
+        },
+        endSession(token, callback){
+            conn.query(`DELETE FROM sessions WHERE token = ?`, 
+            [token],
+            function(err, res) {
+                if (err) {
+                    callback(err)
+                } else {
+                    callback(null, 'success')
+                }
+            });
         }
     }
 }

@@ -44,7 +44,7 @@ var server = app.listen(process.env.PORT, process.env.IP, function() {
 
 //middleware to check cookie
 app.use(function(req, res, next) {
-    
+
     if (req.cookies.token) {
         redditAPI.getUserForCookie(req.cookies.token, function(err, user) {
             if (user) {
@@ -58,14 +58,14 @@ app.use(function(req, res, next) {
     }
 });
 
-app.use(function(req, res, next){
-    
-    if(req.cookies.message) {
-    req.message = req.cookies.message;
-    res.clearCookie('message');
+app.use(function(req, res, next) {
+
+    if (req.cookies.message) {
+        req.message = req.cookies.message;
+        res.clearCookie('message');
     }
     next();
-    
+
 })
 
 //get sorted homepage
@@ -83,12 +83,14 @@ app.get('/', function(req, res) {
         sortingMethod: sort
     }, function(err, sortedPosts) {
         if (err) {
-            res.status(500).send(toHTML.addStyle(`<p class = 'error'>Uh oh! Something went wrong.. try again later</p>`));
+            res.status(500).send(toHTML.addStyle(`<p class = 'error'>Uh oh! Something went wrong.. try again later</p>`, req));
         }
         else {
             var htmlHomepage = toHTML.PostsInHTML(sortedPosts);
+            console.log(htmlHomepage);
             var htmlHomepageRendered = render(htmlHomepage);
-            res.send(toHTML.addStyle(htmlHomepageRendered, req.message));
+            console.log(htmlHomepageRendered);
+            res.send(toHTML.addStyle(htmlHomepageRendered, req, req.message));
         }
     })
 })
@@ -101,7 +103,7 @@ app.get('/vote', function(req, res) {
 //after user votes, send vote confirmation
 app.post('/vote', function(req, res) {
     if (!req.loggedInUser) {
-        res.status(401).send(toHTML.addStyle(`<p class = 'error'>Uh oh, make sure you're <a href = "../login">logged in</a> to vote</p>`));
+        res.status(401).send(toHTML.addStyle(`<p class = 'error'>Uh oh, make sure you're logged in to vote</p>`, req));
     }
     else {
         redditAPI.createOrUpdateVote({
@@ -110,12 +112,12 @@ app.post('/vote', function(req, res) {
             userId: req.loggedInUser.id
         }, function(err, voted) {
             if (err) {
-                res.status(500).send(toHTML.addStyle(`<p class = 'error'>Uh oh! Something went wrong.. try again later</p>`));
+                res.status(500).send(toHTML.addStyle(`<p class = 'error'>Uh oh! Something went wrong.. try again later</p>`, req));
             }
             else {
                 redditAPI.getSinglePost(voted[0].postId, function(err, post) {
                     if (err) {
-                        res.status(500).send(toHTML.addStyle(`<p class = 'error'>Uh oh! Something went wrong.. try again later</p>`));
+                        res.status(500).send(toHTML.addStyle(`<p class = 'error'>Uh oh! Something went wrong.. try again later</p>`, req));
                     }
                     else {
                         if (Number(req.body.vote) === -1) {
@@ -124,8 +126,8 @@ app.post('/vote', function(req, res) {
                         else {
                             voteValue = "up";
                         }
-                        
-                        res.cookie('message', `yay. you ${voteValue}-voted '${post[0].title}'`)                        
+
+                        res.cookie('message', `yay. you ${voteValue}-voted '${post[0].title}'`)
                         res.redirect('/');
                     }
 
@@ -139,7 +141,7 @@ app.post('/vote', function(req, res) {
 app.get('/signup', function(req, res) {
 
     var htmlSignUpRender = render(toHTML.SignUp());
-    res.send(toHTML.addStyle(htmlSignUpRender));
+    res.send(toHTML.addStyle(htmlSignUpRender, req));
 
 });
 
@@ -149,7 +151,7 @@ app.post('/signup', function(req, res) {
         password: req.body.password
     }, function(err, newUser) {
         if (err) {
-            res.status(400).send(toHTML.addStyle(`<p class = 'error'>Try another username!</p>`));
+            res.status(400).send(toHTML.addStyle(`<p class = 'error'>Try another username!</p>`, req));
         }
         else {
             res.redirect('/login');
@@ -160,7 +162,7 @@ app.post('/signup', function(req, res) {
 //login page
 app.get('/login', function(req, res) {
     var htmlLoginRender = render(toHTML.LogIn());
-    res.send(toHTML.addStyle(htmlLoginRender, req.message));
+    res.send(toHTML.addStyle(htmlLoginRender, req, req.message));
 });
 
 //upon login, check username and password, create session, and redirect to
@@ -175,11 +177,11 @@ app.post('/login', function(req, res) {
         else {
             redditAPI.createSession(user.id, function(err, token) {
                 if (err) {
-                    res.status(500).send(toHTML.addStyle(`<p class = 'error'>Uh oh! Something went wrong.. try again later</p>`));
+                    res.status(500).send(toHTML.addStyle(`<p class = 'error'>Uh oh! Something went wrong.. try again later</p>`, req));
                 }
                 else {
                     res.cookie('token', token);
-                    res.cookie('message', `welcome, ${req.loggedInUser.username}`)
+                    res.cookie('message', `welcome, ${user.username}`)
                     res.redirect('/');
                 }
             });
@@ -191,14 +193,14 @@ app.post('/login', function(req, res) {
 app.get('/createPost', function(req, res) {
 
     var htmlPostRender = render(toHTML.CreatePost());
-    res.send(toHTML.addStyle(htmlPostRender));
+    res.send(toHTML.addStyle(htmlPostRender, req));
 
 });
 
 //after post creation, store post in database and redirect to post page
 app.post('/createPost', function(req, res) {
     if (!req.loggedInUser) {
-        res.status(401).send(toHTML.addStyle(`<p class = 'error'>Sign in to create a post!</p>`))
+        res.status(401).send(toHTML.addStyle(`<p class = 'error'>Sign in to create a post!</p>`, req))
     }
     else {
         redditAPI.createPost({
@@ -209,7 +211,7 @@ app.post('/createPost', function(req, res) {
                 //add subreddit later
         }, function(err, newPost) {
             if (err) {
-                res.status(500).send(toHTML.addStyle(`<p class = 'error'>Uh oh! Something went wrong.. try again later</p>`));
+                res.status(500).send(toHTML.addStyle(`<p class = 'error'>Uh oh! Something went wrong.. try again later</p>`, req));
             }
             else {
                 res.redirect(`/posts/${JSON.stringify(newPost.id)}`);
@@ -223,7 +225,7 @@ app.get('/posts/:postId', function(req, res) {
     var postId = Number(req.params.postId);
     redditAPI.getSinglePost(postId, function(err, post) {
         if (err) {
-            res.status(400).send(toHTML.addStyle(`<p class = 'error'>Post does not exist!</p>`));
+            res.status(400).send(toHTML.addStyle(`<p class = 'error'>Post does not exist!</p>`, req));
         }
         else {
             var htmlPost = toHTML.SinglePost(post[0]);
@@ -231,15 +233,28 @@ app.get('/posts/:postId', function(req, res) {
             if (post[1]) {
                 var htmlComments = toHTML.CommentList(post[1]);
                 var htmlCommentsRendered = render(htmlComments);
-                res.send(toHTML.addStyle(htmlPostRender + htmlCommentsRendered));
+                res.send(toHTML.addStyle(htmlPostRender + htmlCommentsRendered, req));
             }
             else {
-                res.send(toHTML.addStyle(htmlPostRender));
+                res.send(toHTML.addStyle(htmlPostRender, req));
             }
         }
     });
 });
 
-// app.get('/logout', function(req, res){
-    
-// })
+app.get('/logout', function(req, res) {
+    if (req.cookies.token) {
+        redditAPI.endSession(req.cookies.token, function(err, result) {
+            if (err) {
+                res.status(500).send(toHTML.addStyle(`<p class = 'error'>Uh oh! Something went wrong.. try again later</p>`, req));
+            }
+            else {
+                res.clearCookie('token');
+                res.redirect('/');
+            }
+        });
+    } 
+    else {
+        res.redirect('/');
+    }
+});

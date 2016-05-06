@@ -181,10 +181,24 @@ function CreatePost(){
 
 //------------Function linking CSS-----------------
 
-function addStyle(someHTML, welcomeUser) {
+function addStyle(someHTML, req, welcomeUser) {
 
     if (!welcomeUser) {
         var welcomeUser = '';
+    }
+    
+    var rightNav = 
+        `<div class='menuItem'><a href = '/createPost'>create post</a></div>
+         <div class = 'menuItem'><a href = '/logout'>logout</a></div>`
+    
+    if (!req.loggedInUser) {
+        rightNav = `
+            <div class = 'login' class='menuItem'><span class = 'dropbtn'>login</span>
+                <div class="dropdown-content">
+                    <a href="/login">login</a>
+                    <a href="/signup">signup</a>
+                </div>
+            </div>`
     }
     
     return `
@@ -208,13 +222,7 @@ function addStyle(someHTML, welcomeUser) {
                 </div>
                 <div class = 'menuItem' id = 'middleNav'>${welcomeUser}</div>
                 <div class = 'rightNav'>
-                    <div class='menuItem'><a href = "/createPost">create post</a></div>
-                    <div class = 'login' class='menuItem'><span class = 'dropbtn'>login</span>
-                        <div class="dropdown-content">
-                        <a href="/login">login</a>
-                        <a href="/signup">signup</a>
-                        </div>
-                    </div>
+                    ${rightNav}
                 </div>
             </div>
             <div class = 'pageTitle'><a href = '/'><h1>RedditClone.</h1></a></div>
@@ -236,5 +244,4 @@ module.exports = {
     LogIn: LogIn,
     CreatePost: CreatePost,
     addStyle: addStyle
-    
 }
