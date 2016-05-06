@@ -3,6 +3,16 @@
 $darkPurple: #7115D3;
 $darkYellow: #FFEE06;
 $lightPurple: #D6B5FA;
+$blue: #BEBAFA;
+$lightYellow: #FFFAB3;
+
+.header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: white;
+    z-index: 999;
+}
 
 body {
     font-family: 'Work sans';
@@ -15,8 +25,12 @@ body {
         width: 100%;
         text-align: center;
         font-weight: 100;
+        a {
+            text-decoration: none;
+            color: $darkYellow;
+        }
     }
-
+    
     .navbar {
         width: 100%;
         margin: 0;
@@ -27,9 +41,16 @@ body {
         color: $darkYellow;
         font-weight: 400;
         
-        
         .menuItem {
             padding: 1em;
+        }
+        
+        #middleNav{
+            padding-left: 7em;
+        }
+        
+        #middleNav:hover {
+            background-color: $darkPurple;
         }
         
         .menuItem:hover{
@@ -38,8 +59,9 @@ body {
         
         .rightNav {
             display: flex;
-            justtify-contetn: flex-end;
+            justify-content: flex-end;
         }
+        
         
     //dropbutton functionality
         .dropbtn {
@@ -52,12 +74,12 @@ body {
             position: absolute;
             background-color: #FFF67F;
             box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-            //right: 0;
         }
         
         .rightNav .dropdown-content {
             right: 0;
             text-align: right;
+            min-width: 90px;
         }
 
         .dropdown-content a {
@@ -87,7 +109,7 @@ body {
             padding: 0;
         
             .dropdown-content{
-                padding: 0;
+                padding: 0em;
             }
         }
         
@@ -103,6 +125,7 @@ body {
     margin-top: 212px;
 }
 
+//----------------homepage----------------
 .listOfPosts {
     h1 {
         display: none;
@@ -138,6 +161,7 @@ body {
         .info {
             text-align: left;
             color: white;
+            width: 225;
         }
         
         .title {
@@ -179,6 +203,11 @@ body {
                 border: none;
                 margin-top: 15px;
                 
+                &:focus{
+                    outline: none;
+                    border: 2px solid $darkYellow;
+                }
+                
                 span {
                     display: none;
                 }
@@ -201,12 +230,175 @@ body {
     }
 }
 
-.header {
-    position: fixed;
-    top: 0;
-    width: 100%;
-    background: white;
-    z-index: 999;
+
+//----------------post with comments page----------------
+
+.post {
+
+    display: flex;
+    justify-content: flex-end;
+    flex-direction: row-reverse;
+    align-items: center;
+    background-color: #D6B5FA;
+    padding: 1em;
+    margin-top: 2em;
+    margin-bottom: 2em;
+    
+    h1 {
+        color: $darkPurple;
+        margin-left: 6%;
+    }
+    
+    p {
+        color: white;
+        margin-left: 6%;
+    }
+    
+    .placeKitten {
+        height: 125px;
+        width: 125px;
+        margin-right: 6%;
+            
+            img {
+                border-radius: 20px;
+                -webkit-filter: grayscale(100%);
+            }
+        }
+    
+    
+    .voting{
+        margin-left: 6%;
+        margin-right: 6%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+            
+        #voteScore {
+            text-align: center;
+            width: 50px;
+            color: $darkPurple;
+        }
+            
+        .downVote  {
+                
+            button {
+                transform: rotate(180deg);
+            }
+        }
+            
+        button {
+            background-image: url(http://chinagroups.ru/wp-content/themes/1ps-template/img/on-top.png);
+            background-repeat: no-repeat;
+            background-position: 50% 50%;
+            background-size: contain;
+            border-radius: 50%;
+            height: 50px;
+            width: 50px;
+            border: none;
+            margin-top: 15px;
+            
+            &:focus{
+                outline: none;
+                border: 2px solid $darkYellow;
+            }
+                
+            span {
+                display: none;
+            }
+                
+        }
+            
+    }
+    
 }
 
+.comments {
+    
+    display: flex;
+    flex-direction: column;
+    list-style-type: none;
+    padding: 0;
+    margin-left: 10%;
+    
+    .singleComment {
+        display: flex;
+        flex-direction: row-reverse;
+        margin-top: 2em;
+        margin-bottom: 2em;   
+        background-color: $darkYellow;
+        justify-content: flex-end;
+        right: 0;
+        
+        p {
+            margin-left: 6%;
+            margin-right: 6%;
+            color: white;
+        }
+            
+        h2 {
+            color: $darkPurple;
+        }
+    }
+}
 
+//----------------all the forms----------------
+
+.form {
+    
+    display: flex;
+    justify-content: center;
+    font-size: 1.5em;
+    color: $darkPurple;
+    
+    p{
+        text-align: center;
+    }
+    
+    input {
+        color: $darkPurple;
+    }
+    
+    input:focus {
+        border: 2px solid $darkYellow;
+        outline: none;
+    }
+    
+    
+    form {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        
+        div {
+            display: flex;
+            justify-content: center; 
+            padding: 0.5em;
+        }
+        
+        button {
+            background: white;
+            border: none;
+            font-size: 0.7em;
+            color: $darkPurple;
+            border-radius: 10px;
+            border: 2px solid $darkPurple;
+            margin-top: 10px;
+            min-width:  140px;
+            
+        }
+        
+        button:focus {
+            outline:none;
+            border: 2px solid $darkYellow;
+        }
+    }
+}
+
+//----------------errors----------------
+
+.error {
+    margin-top: 10em;
+    text-align: center;
+    color: $darkPurple;
+    font-size: 1.5em;
+}

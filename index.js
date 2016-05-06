@@ -1,17 +1,15 @@
-// load the mysql library
 var mysql = require('mysql');
 var util = require('util');
-var moment = require('moment');
-var emoji = require('node-emoji');
+//var moment = require('moment');
+//var emoji = require('node-emoji');
+
 var React = require('react');
 var ReactDOM = require('react-dom');
 var render = require('react-dom/server').renderToStaticMarkup;
+
 var express = require('express');
 var app = express();
-app.use(express.static('css'));
-
-//MY SHIT
-//var SignUp = require("./signup.js");
+app.use(express.static('public'));
 
 // create a connection to our Cloud9 server
 var connection = mysql.createConnection({
@@ -24,9 +22,8 @@ var connection = mysql.createConnection({
 // load our API and pass it the connection
 var reddit = require('./reddit');
 var redditAPI = reddit(connection);
-
-
-
+//load all react and styling functions
+var toHTML = require('./toHTML.js');
 
 var bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({
@@ -47,6 +44,7 @@ var server = app.listen(process.env.PORT, process.env.IP, function() {
 
 //middleware to check cookie
 app.use(function(req, res, next) {
+    
     if (req.cookies.token) {
         redditAPI.getUserForCookie(req.cookies.token, function(err, user) {
             if (user) {
@@ -60,9 +58,21 @@ app.use(function(req, res, next) {
     }
 });
 
+app.use(function(req, res, next){
+    
+    if(req.cookies.message) {
+    req.message = req.cookies.message;
+    res.clearCookie('message');
+    }
+    next();
+    
+})
+
 //get sorted homepage
 //will default to new if invalid sorting parameter
+//if user just logged in, will say hello
 app.get('/', function(req, res) {
+
     if (req.query.sort) {
         var sort = req.query.sort;
     }
@@ -73,23 +83,25 @@ app.get('/', function(req, res) {
         sortingMethod: sort
     }, function(err, sortedPosts) {
         if (err) {
-            res.status(500).send('Uh oh! Something went wrong.. try again later');
+            res.status(500).send(toHTML.addStyle(`<p class = 'error'>Uh oh! Something went wrong.. try again later</p>`));
         }
         else {
-            var htmlHomepage = PostsInHTML(sortedPosts);
+            var htmlHomepage = toHTML.PostsInHTML(sortedPosts);
             var htmlHomepageRendered = render(htmlHomepage);
-            res.send(addStyle(htmlHomepageRendered));
+            res.send(toHTML.addStyle(htmlHomepageRendered, req.message));
         }
     })
 })
 
+//redirect user to homepage, this is where voting happens 
 app.get('/vote', function(req, res) {
-    res.redirect('../');
+    res.redirect('/');
 })
 
+//after user votes, send vote confirmation
 app.post('/vote', function(req, res) {
     if (!req.loggedInUser) {
-        res.status(401).send('Uh oh, make sure you\'re <a href = "../login">logged in</a> to vote');
+        res.status(401).send(toHTML.addStyle(`<p class = 'error'>Uh oh, make sure you're <a href = "../login">logged in</a> to vote</p>`));
     }
     else {
         redditAPI.createOrUpdateVote({
@@ -98,12 +110,12 @@ app.post('/vote', function(req, res) {
             userId: req.loggedInUser.id
         }, function(err, voted) {
             if (err) {
-                res.status(500).send('Uh oh! Something went wrong.. try again later');
+                res.status(500).send(toHTML.addStyle(`<p class = 'error'>Uh oh! Something went wrong.. try again later</p>`));
             }
             else {
                 redditAPI.getSinglePost(voted[0].postId, function(err, post) {
                     if (err) {
-                        res.status(500).send('Uh oh! Something went wrong.. try again later');
+                        res.status(500).send(toHTML.addStyle(`<p class = 'error'>Uh oh! Something went wrong.. try again later</p>`));
                     }
                     else {
                         if (Number(req.body.vote) === -1) {
@@ -112,9 +124,9 @@ app.post('/vote', function(req, res) {
                         else {
                             voteValue = "up";
                         }
-                        var htmlVotepage = VotePage(voteValue, post);
-                        var htmlVotepageRendered = render(htmlVotepage);
-                        res.send(addStyle(htmlVotepageRendered));
+                        
+                        res.cookie('message', `yay. you ${voteValue}-voted '${post[0].title}'`)                        
+                        res.redirect('/');
                     }
 
                 });
@@ -126,8 +138,8 @@ app.post('/vote', function(req, res) {
 //signup page
 app.get('/signup', function(req, res) {
 
-    var htmlSignUpRender = render(SignUp());
-    res.send(addStyle(htmlSignUpRender));
+    var htmlSignUpRender = render(toHTML.SignUp());
+    res.send(toHTML.addStyle(htmlSignUpRender));
 
 });
 
@@ -137,52 +149,56 @@ app.post('/signup', function(req, res) {
         password: req.body.password
     }, function(err, newUser) {
         if (err) {
-            res.status(400).send('Try another username!');
+            res.status(400).send(toHTML.addStyle(`<p class = 'error'>Try another username!</p>`));
         }
         else {
-            res.redirect('../login');
+            res.redirect('/login');
         }
     })
 })
 
 //login page
 app.get('/login', function(req, res) {
-    
-    var htmlLoginRender = render(LogIn());
-    res.send(addStyle(htmlLoginRender));
-    
+    var htmlLoginRender = render(toHTML.LogIn());
+    res.send(toHTML.addStyle(htmlLoginRender, req.message));
 });
 
+//upon login, check username and password, create session, and redirect to
+//homepage with welcome message
+//if invalid combo, show error message and redirect to login
 app.post('/login', function(req, res) {
     redditAPI.checkLogin(req.body.username, req.body.password, function(err, user) {
         if (err) {
-            res.status(400).send('Username or password is incorrect');
+            res.cookie('message', `username or password is incorrect`);
+            res.redirect('/login')
         }
         else {
             redditAPI.createSession(user.id, function(err, token) {
                 if (err) {
-                    res.status(500).send('Uh oh! Something went wrong.. try again later');
+                    res.status(500).send(toHTML.addStyle(`<p class = 'error'>Uh oh! Something went wrong.. try again later</p>`));
                 }
                 else {
                     res.cookie('token', token);
-                    res.redirect('../');
+                    res.cookie('message', `welcome, ${req.loggedInUser.username}`)
+                    res.redirect('/');
                 }
             });
         }
     });
 })
 
-//create post page
+//create post page with form
 app.get('/createPost', function(req, res) {
 
-    var htmlPostRender = render(CreatePost());
-    res.send(addStyle(htmlPostRender));
+    var htmlPostRender = render(toHTML.CreatePost());
+    res.send(toHTML.addStyle(htmlPostRender));
 
 });
 
+//after post creation, store post in database and redirect to post page
 app.post('/createPost', function(req, res) {
     if (!req.loggedInUser) {
-        res.status(401).send('Sign in to create a post!')
+        res.status(401).send(toHTML.addStyle(`<p class = 'error'>Sign in to create a post!</p>`))
     }
     else {
         redditAPI.createPost({
@@ -193,7 +209,7 @@ app.post('/createPost', function(req, res) {
                 //add subreddit later
         }, function(err, newPost) {
             if (err) {
-                res.status(500).send('Uh oh! Something went wrong.. try again later');
+                res.status(500).send(toHTML.addStyle(`<p class = 'error'>Uh oh! Something went wrong.. try again later</p>`));
             }
             else {
                 res.redirect(`/posts/${JSON.stringify(newPost.id)}`);
@@ -202,204 +218,28 @@ app.post('/createPost', function(req, res) {
     }
 });
 
+//page for single posts with comments
 app.get('/posts/:postId', function(req, res) {
     var postId = Number(req.params.postId);
     redditAPI.getSinglePost(postId, function(err, post) {
         if (err) {
-            res.status(400).send('Post does not exist!');
+            res.status(400).send(toHTML.addStyle(`<p class = 'error'>Post does not exist!</p>`));
         }
         else {
-            var htmlPost = SinglePost(post[0]);
+            var htmlPost = toHTML.SinglePost(post[0]);
             var htmlPostRender = render(htmlPost);
             if (post[1]) {
-                var htmlComments = CommentList(post[1]);
+                var htmlComments = toHTML.CommentList(post[1]);
                 var htmlCommentsRendered = render(htmlComments);
-                res.send(addStyle(htmlPostRender + htmlCommentsRendered));
+                res.send(toHTML.addStyle(htmlPostRender + htmlCommentsRendered));
             }
             else {
-                res.send(addStyle(htmlPostRender));
+                res.send(toHTML.addStyle(htmlPostRender));
             }
         }
     });
 });
 
-//------------JSX Functions-----------------
-
-function PostsInHTML(result) {
-    return (
-        <div className = 'listOfPosts'>
-            <h1>List of Posts</h1>
-                <ul>
-                {result.map(function(post){
-                    var postRedirect = `../posts/${post.id}`; 
-                    return(
-                    <li>
-                    <div className = 'title'>
-                    <h2><a href = {postRedirect}>{post.title}</a></h2>
-                    </div>
-                    <div className = 'info'>
-                    user: {post.user.username} <br />
-                    url: {post.url} <br />
-                    created: {moment(post.createdAt).fromNow()} <br />
-                    </div>
-                    <div className = 'placeKitten'>
-                    <img src="http://placekitten.com/125/125" />
-                    </div>
-                    <div className = 'voting'>
-                    <div className = 'upVote'>
-                    <form action="/vote" method="post" >
-                    <input type="hidden" name="vote" value="1" />
-                    <input type="hidden" name="postId" value={post.id} />
-                    <button type="submit"><span>upvote this</span></button>
-                    </form>
-                    <div id = 'voteScore'>{post.voteScore}</div>
-                    </div>
-                    <div className = 'downVote'>
-                    <form action="/vote" method="post">
-                    <input type="hidden" name="vote" value="-1" />
-                    <input type="hidden" name="postId" value={post.id} />
-                    <button type="submit"><span>downvote this</span></button>
-                    </form>
-                    </div>
-                    </div>
-                    </li>
-                    )
-                    })
-                }
-                </ul>
-        </div>
-    )
-}
-
-function CommentList(comments) {
-    return (
-        <ul>
-            {comments.map(SingleComment)}
-        </ul>
-    )
-}
-
-function SingleComment(comment) {
-    return (
-        <li>
-        <h2>{comment.text}</h2>
-        <p>user: {comment.username}<br />
-        created: {moment(comment.createdAt).fromNow()}
-        </p>
-        {comment.replies ? CommentList(comment.replies) : null}
-        </li>
-    )
-}
-
-function SinglePost(post) {
-    return (
-        <div className = 'post'>
-        <h1>{post.title}</h1>
-        <p>user: {post.username} <br />
-        url: {post.url} <br />
-        created: {moment(post.createdAt).fromNow()} <br />
-        score: {post.score} 
-        </p>
-        </div>
-    )
-}
-
-function VotePage(voteValue, post) {
-    return (
-        <div className = 'voted'>
-            <h1>Yay. You {voteValue}-voted this post.</h1><br />
-            <h2>{post[0].title}</h2>
-            <p>user: {post[0].username}<br />
-                url: {post[0].url}<br />
-                score: {post[0].score}<br />
-                created: {moment(post[0].createdAt).fromNow()} <br />
-            </p>
-            <p><a href = '../'> home </a></p>
-        </div>
-    )
-}
-
-function SignUp() {
-    return (
-        <form action="/signup" method="POST">
-            <p>Create a username and password</p>
-            <div>
-                <input type="text" name="username" placeholder="username" />
-            </div>
-            <div>
-                <input type="password" name="password" placeholder="password" />
-            </div>
-            <button type="submit">Create account!</button>
-        </form>
-    )
-}
-
-function LogIn(){
-    return (
-    <form action="/login" method="POST">
-        <p>Enter your username and password</p>
-        <div>
-            <input type="text" name="username" placeholder="username" />
-        </div>
-        <div>
-            <input type="password" name="password" placeholder="password" />
-        </div>
-        <button type="submit">Sign in!</button>
-    </form>
-    )
-}
-
-function CreatePost(){
-    return (
-    <form action="/createPost" method="POST">
-        <p>Post</p>
-        <div>
-            <input type="text" name="title" placeholder="title"/>
-        </div>
-        <div>
-            <input type="text" name="url" placeholder="url"/>
-        </div>
-        <button type="submit">Create post!</button>
-    </form>
-    )
-}
-
-//------------Function linking CSS-----------------
-
-function addStyle(someHTML) {
-    return `
-        <head>
-        <title>RedditClone</title>
-        <link rel='stylesheet' href='../style.css' type = 'text/css' />
-        <link href='https://fonts.googleapis.com/css?family=Work+Sans:400,100' rel='stylesheet' type='text/css'>
-        </head>
-        <body>
-        <div class = 'header'>
-            <div class = 'navbar'>
-                <div class = 'login' class='menuItem'><span class = 'dropbtn'>sort</span>
-                    <div class="dropdown-content">
-                    <a href="/?sort=hot">hot</a>
-                    <a href="/?sort=top">top</a>                    
-                    <a href="/?sort=controversial">controversial</a>
-                    </div>                
-                </div>
-                <div class = 'rightNav'>
-                    <div class='menuItem'><a href = "/">home</a></div>
-                    <div class='menuItem'><a href = "/createPost">create post</a></div>
-                    <div class = 'login' class='menuItem'><span class = 'dropbtn'>login</span>
-                        <div class="dropdown-content">
-                        <a href="/login">login</a>
-                        <a href="/signup">signup</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class = 'pageTitle'><h1>RedditClone.</h1></div>
-        </div>
-        <div class = 'varContent'>
-        ${someHTML}
-        </div>
-        </body>
-    `
-}
-
+// app.get('/logout', function(req, res){
+    
+// })

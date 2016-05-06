@@ -385,6 +385,9 @@ module.exports = function RedditAPI(conn) {
                     if (err) {
                         callback(new Error('Username or password is incorrect'));
                     }
+                    else if (result.length === 0){
+                        callback(new Error('Username or password is incorrect'));
+                    }
                     else {
                         var user = result[0];
                         bcrypt.compare(password, user.password, function(err, same) {
