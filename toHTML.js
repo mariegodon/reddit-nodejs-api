@@ -141,7 +141,7 @@ function SignUp() {
     )
 }
 
-function LogIn(){
+function LogIn() {
     return (
         <div className = 'form'>
             <form action="/login" method="POST">
@@ -160,7 +160,7 @@ function LogIn(){
     )
 }
 
-function CreatePost(){
+function CreatePost() {
     return (
         <div className = 'form'>
             <form action="/createPost" method="POST">
@@ -186,11 +186,11 @@ function addStyle(someHTML, req, welcomeUser) {
     if (!welcomeUser) {
         var welcomeUser = '';
     }
-    
-    var rightNav = 
+
+    var rightNav =
         `<div class='menuItem'><a href = '/createPost'>create post</a></div>
          <div class = 'menuItem'><a href = '/logout'>logout</a></div>`
-    
+
     if (!req.loggedInUser) {
         rightNav = `
             <div class = 'login' class='menuItem'><span class = 'dropbtn'>login</span>
@@ -200,7 +200,7 @@ function addStyle(someHTML, req, welcomeUser) {
                 </div>
             </div>`
     }
-    
+
     return `
         <head>
         <title>RedditClone</title>
@@ -212,7 +212,7 @@ function addStyle(someHTML, req, welcomeUser) {
         <body>
         <div class = 'header'>
 
-            <div class = 'navbar'>
+            <nav>
                 <div class = 'login' class='menuItem'><span class = 'dropbtn'>sort</span>
                     <div class="dropdown-content">
                     <a href="/?sort=hot">hot</a>
@@ -224,16 +224,19 @@ function addStyle(someHTML, req, welcomeUser) {
                 <div class = 'rightNav'>
                     ${rightNav}
                 </div>
+            </nav>
+            <div class = 'pageTitle'>
+                <div id = 'animation'>
+                <img src='/reddit-ant.png'/ id = 'antenna'>
+                <img src='/Reddit-Icon.png'/>
+                <div class = "eye" id = "leftEye"></div>
+                <div class = "eye" id = "rightEye"></div>
+                </div>
+                <a href = '/'><h1>RedditClone.</h1></a></div>
             </div>
-            <div class = 'pageTitle'><a href = '/'><h1>RedditClone.</h1></a></div>
         </div>
         <div class = 'varContent'>
-        ${someHTML}
-        </div>
-        <div id = 'animation'>
-        <img src='/reddit-ant.png'/ id = 'antenna'>
-        <img src='/Reddit-Icon.png'/>
-        </div>
+            ${someHTML}
         </body>
     `
 }

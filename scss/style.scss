@@ -10,7 +10,7 @@ $lightYellow: #FFFAB3;
     position: fixed;
     top: 0;
     width: 100%;
-    background: white;
+    background-color: rgba(255, 255, 255, 0.95);
     z-index: 999;
 }
 
@@ -25,13 +25,18 @@ body {
         width: 100%;
         text-align: center;
         font-weight: 100;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        
         a {
             text-decoration: none;
             color: $darkYellow;
         }
     }
     
-    .navbar {
+    nav {
         width: 100%;
         margin: 0;
         display: flex;
@@ -122,7 +127,7 @@ body {
 }
 
 .varContent {
-    margin-top: 212px;
+    margin-top: 253px;
 }
 
 //----------------homepage----------------
@@ -406,23 +411,36 @@ body {
 
 //----------------spinning animation----------------
 
+
 #animation {
     display: flex;
     flex-direction: column;
-    
-        perspective: 200px;
-            transform-style: preserve-3d;
-                align-items: center;
+    perspective: 200px;
+    transform-style: preserve-3d;
+    align-items: center;
     justify-content: center;
 }
 
-#antenna {
-    margin-left: 80px;
+#animation img{
+    max-width:180px;
+}
+
+#animation #antenna {
+    margin-left: 55px;
     transform-origin: 25% center;
-    animation: infinite-spinning 2s infinite;
     top: 4px;
     position: relative;
+    max-width: 100px;
     
+    &.isAnimated {
+        animation: infinite-spinning 2s linear infinite;
+    }
+    
+}
+
+
+#animation img{
+    max-width:180px;
 }
 
 @-webkit-keyframes infinite-spinning {
@@ -435,3 +453,20 @@ body {
   }
 }
 
+.eye {
+    min-height: 23px;
+    min-width: 23px;
+    background: $darkYellow;
+    position: absolute;
+    top: 82px;
+    border-radius: 50%;
+    
+}
+
+#rightEye {
+    left: 60px;
+}
+
+#leftEye {
+    left: 101px;
+}

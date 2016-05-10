@@ -2,7 +2,7 @@
   position: fixed;
   top: 0;
   width: 100%;
-  background: white;
+  background-color: rgba(255, 255, 255, 0.95);
   z-index: 999; }
 
 body {
@@ -14,11 +14,15 @@ body {
     font-size: 2em;
     width: 100%;
     text-align: center;
-    font-weight: 100; }
+    font-weight: 100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px; }
     body .pageTitle a {
       text-decoration: none;
       color: #FFEE06; }
-  body .navbar {
+  body nav {
     width: 100%;
     margin: 0;
     display: flex;
@@ -27,53 +31,53 @@ body {
     font-size: 1em;
     color: #FFEE06;
     font-weight: 400; }
-    body .navbar .menuItem {
+    body nav .menuItem {
       padding: 1em; }
-    body .navbar #middleNav {
+    body nav #middleNav {
       padding-left: 7em; }
-    body .navbar #middleNav:hover {
+    body nav #middleNav:hover {
       background-color: #7115D3; }
-    body .navbar .menuItem:hover {
+    body nav .menuItem:hover {
       background-color: #D6B5FA; }
-    body .navbar .rightNav {
+    body nav .rightNav {
       display: flex;
       justify-content: flex-end; }
-    body .navbar .dropbtn {
+    body nav .dropbtn {
       padding: 1em;
       display: block; }
-    body .navbar .dropdown-content {
+    body nav .dropdown-content {
       display: none;
       position: absolute;
       background-color: #FFF67F;
       box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2); }
-    body .navbar .rightNav .dropdown-content {
+    body nav .rightNav .dropdown-content {
       right: 0;
       text-align: right;
       min-width: 90px; }
-    body .navbar .dropdown-content a {
+    body nav .dropdown-content a {
       color: #7115D3;
       padding: 12px 16px;
       text-decoration: none;
       display: block; }
-    body .navbar .dropdown-content a:hover {
+    body nav .dropdown-content a:hover {
       background-color: #D6B5FA; }
-    body .navbar .login:hover .dropdown-content {
+    body nav .login:hover .dropdown-content {
       background-color: #FFEE06;
       display: block; }
-    body .navbar .login:hover .dropbtn {
+    body nav .login:hover .dropbtn {
       background-color: #D6B5FA; }
-    body .navbar .login {
+    body nav .login {
       position: relative;
       display: inline-block;
       padding: 0; }
-      body .navbar .login .dropdown-content {
+      body nav .login .dropdown-content {
         padding: 0em; }
-    body .navbar a {
+    body nav a {
       text-decoration: none;
       color: #FFEE06; }
 
 .varContent {
-  margin-top: 212px; }
+  margin-top: 253px; }
 
 .listOfPosts h1 {
   display: none; }
@@ -260,17 +264,38 @@ body {
   align-items: center;
   justify-content: center; }
 
-#antenna {
-  margin-left: 80px;
+#animation img {
+  max-width: 180px; }
+
+#animation #antenna {
+  margin-left: 55px;
   transform-origin: 25% center;
-  animation: infinite-spinning 2s infinite;
   top: 4px;
-  position: relative; }
+  position: relative;
+  max-width: 100px; }
+  #animation #antenna.isAnimated {
+    animation: infinite-spinning 2s linear infinite; }
+
+#animation img {
+  max-width: 180px; }
 
 @-webkit-keyframes infinite-spinning {
   from {
     transform: rotateY(0deg); }
   to {
     transform: rotateY(360deg); } }
+.eye {
+  min-height: 23px;
+  min-width: 23px;
+  background: #FFEE06;
+  position: absolute;
+  top: 82px;
+  border-radius: 50%; }
+
+#rightEye {
+  left: 60px; }
+
+#leftEye {
+  left: 101px; }
 
 /*# sourceMappingURL=style.css.map */
