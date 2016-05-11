@@ -1,5 +1,9 @@
 var mysql = require('mysql');
 var util = require('util');
+require('longjohn');
+var request = require('request');
+/* global $*/
+var cheerio = require('cheerio');
 //var moment = require('moment');
 //var emoji = require('node-emoji');
 
@@ -58,6 +62,8 @@ app.use(function(req, res, next) {
     }
 });
 
+//middleware to check if there is a message to display on navbar
+//ex welcome, you voted
 app.use(function(req, res, next) {
 
     if (req.cookies.message) {
@@ -100,15 +106,17 @@ app.get('/vote', function(req, res) {
 
 //after user votes, send vote confirmation
 app.post('/vote', function(req, res) {
+
     if (!req.loggedInUser) {
         res.status(401).send(toHTML.addStyle(`<p class = 'error'>Uh oh, make sure you're logged in to vote</p>`, req));
     }
     else {
-        redditAPI.createOrUpdateVote({
+        var data = {
             vote: Number(req.body.vote),
             postId: Number(req.body.postId),
             userId: req.loggedInUser.id
-        }, function(err, voted) {
+        };
+        redditAPI.createOrUpdateVote(data, function(err, voted) {
             if (err) {
                 res.status(500).send(toHTML.addStyle(`<p class = 'error'>Uh oh! Something went wrong.. try again later</p>`, req));
             }
@@ -124,9 +132,13 @@ app.post('/vote', function(req, res) {
                         else {
                             voteValue = "up";
                         }
-
-                        res.cookie('message', `yay. you ${voteValue}-voted '${post[0].title}'`)
-                        res.redirect('/');
+                        var resultObject = {
+                            postId: req.body.postId,
+                            voteScore: post[0].score,
+                            message: `yay. you ${voteValue}-voted '${post[0].title}'`
+                        }
+                        //res.cookie('message', `yay. you ${voteValue}-voted '${post[0].title}'`)
+                        res.send(resultObject);
                     }
 
                 });
@@ -240,6 +252,7 @@ app.get('/posts/:postId', function(req, res) {
     });
 });
 
+//logout, clear session cookies, clear tokens in mySQL
 app.get('/logout', function(req, res) {
     if (req.cookies.token) {
         redditAPI.endSession(req.cookies.token, function(err, result) {
@@ -256,3 +269,19 @@ app.get('/logout', function(req, res) {
         res.redirect('/');
     }
 });
+
+//suggest title, receive url from user on create post page as query
+app.post('/suggestTitle', function(req, res){
+
+    var url = req.query.url
+    //request this url
+    request(url, function(err, result, body){
+        if (!err && res.statusCode == 200) {
+            $ = cheerio.load(body);
+            //parse resulting html, get title text only
+            var title = $('title').text();
+            //send this as the suggested title
+            res.send(title);
+        }
+    })
+})

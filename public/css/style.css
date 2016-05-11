@@ -1,3 +1,6 @@
+* {
+  box-sizing: border-box; }
+
 .header {
   position: fixed;
   top: 0;
@@ -114,11 +117,12 @@ body {
     margin-right: 6%;
     display: flex;
     flex-direction: column;
-    justify-content: center; }
-    .listOfPosts li .voting #voteScore {
+    justify-content: space-around; }
+    .listOfPosts li .voting .voteScore {
       text-align: center;
       width: 50px;
-      color: #7115D3; }
+      color: #7115D3;
+      margin: 5px 0; }
     .listOfPosts li .voting .downVote button {
       transform: rotate(180deg); }
     .listOfPosts li .voting button {
@@ -127,16 +131,15 @@ body {
       background-position: 50% 50%;
       background-size: contain;
       border-radius: 50%;
-      /* put the height and width of your image here */
       height: 50px;
       width: 50px;
-      border: none;
-      margin-top: 15px; }
+      border: none; }
       .listOfPosts li .voting button:focus {
-        outline: none;
-        border: 2px solid #FFEE06; }
+        outline: none; }
       .listOfPosts li .voting button span {
         display: none; }
+    .listOfPosts li .voting .voteForm.hasVoted button {
+      background-color: #FFEE06; }
   .listOfPosts li .placeKitten {
     height: 125px;
     width: 125px;
@@ -174,10 +177,11 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center; }
-    .post .voting #voteScore {
+    .post .voting .voteScore {
       text-align: center;
       width: 50px;
-      color: #7115D3; }
+      color: #7115D3;
+      margin: 5px 0; }
     .post .voting .downVote button {
       transform: rotate(180deg); }
     .post .voting button {
@@ -188,13 +192,13 @@ body {
       border-radius: 50%;
       height: 50px;
       width: 50px;
-      border: none;
-      margin-top: 15px; }
+      border: none; }
       .post .voting button:focus {
-        outline: none;
-        border: 2px solid #FFEE06; }
+        outline: none; }
       .post .voting button span {
         display: none; }
+    .post .voting .voteForm.hasVoted button {
+      background-color: #FFEE06; }
 
 .comments {
   display: flex;
@@ -217,6 +221,17 @@ body {
     .comments .singleComment h2 {
       color: #7115D3; }
 
+button, select {
+  font-family: inherit;
+  font-size: 100%; }
+
+input, textarea {
+  font-family: inherit;
+  font-size: 75%; }
+
+textarea {
+  border: none; }
+
 .form {
   display: flex;
   justify-content: center;
@@ -224,9 +239,9 @@ body {
   color: #7115D3; }
   .form p {
     text-align: center; }
-  .form input {
+  .form input, .form textarea {
     color: #7115D3; }
-  .form input:focus {
+  .form input:focus, .form textarea:focus {
     border: 2px solid #FFEE06;
     outline: none; }
   .form form {
@@ -245,10 +260,34 @@ body {
       border-radius: 8px;
       border: 2px solid #7115D3;
       margin-top: 10px;
-      min-width: 140px; }
+      min-width: 140px;
+      transition: all .3s ease-in-out; }
+      .form form button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed; }
+      .form form button:enabled {
+        box-shadow: 0 8px 12px 0 rgba(0, 0, 0, 0.16), 0 13px 45px 0 rgba(0, 0, 0, 0.12); }
+        .form form button:enabled:hover {
+          transform: scale(1.05); }
     .form form button:focus {
       outline: none;
       border: 2px solid #FFEE06; }
+    .form form .postInput {
+      background-color: #D6B5FA;
+      border-radius: 5px;
+      margin: 5px 0;
+      padding: 0.8em;
+      display: flex;
+      flex-direction: column;
+      align-items: center; }
+      .form form .postInput input, .form form .postInput textarea {
+        width: 500px; }
+      .form form .postInput .input1 {
+        height: 70px; }
+      .form form .postInput button {
+        font-size: 0.4em;
+        min-width: 70px;
+        border-radius: 4px; }
 
 .error {
   margin-top: 10em;

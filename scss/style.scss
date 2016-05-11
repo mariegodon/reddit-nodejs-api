@@ -6,6 +6,11 @@ $lightPurple: #D6B5FA;
 $blue: #BEBAFA;
 $lightYellow: #FFFAB3;
 
+* {
+    box-sizing: border-box;
+}
+
+
 .header {
     position: fixed;
     top: 0;
@@ -181,12 +186,13 @@ body {
             margin-right: 6%;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: space-around;
             
-            #voteScore {
+            .voteScore {
                 text-align: center;
                 width: 50px;
                 color: $darkPurple;
+                margin: 5px 0;
             }
             
             .downVote  {
@@ -202,21 +208,26 @@ body {
                 background-position: 50% 50%;
                 background-size: contain;
                 border-radius: 50%;
-                /* put the height and width of your image here */
                 height: 50px;
                 width: 50px;
                 border: none;
-                margin-top: 15px;
                 
                 &:focus{
                     outline: none;
-                    border: 2px solid $darkYellow;
+                    //border: 2px solid $darkYellow;
                 }
                 
                 span {
                     display: none;
                 }
                 
+            }
+            
+            // using jquery, change button to yellow after voting
+            .voteForm.hasVoted {
+                button {
+                    background-color: $darkYellow;
+                }
             }
             
         }
@@ -279,10 +290,11 @@ body {
         flex-direction: column;
         justify-content: center;
             
-        #voteScore {
+        .voteScore {
             text-align: center;
             width: 50px;
             color: $darkPurple;
+            margin: 5px 0;
         }
             
         .downVote  {
@@ -301,17 +313,23 @@ body {
             height: 50px;
             width: 50px;
             border: none;
-            margin-top: 15px;
             
             &:focus{
                 outline: none;
-                border: 2px solid $darkYellow;
+                //border: 2px solid $darkYellow;
             }
                 
             span {
                 display: none;
             }
                 
+        }
+        
+        // using jquery, change button to yellow after voting
+        .voteForm.hasVoted {
+            button {
+                background-color: $darkYellow;
+            }
         }
             
     }
@@ -349,6 +367,20 @@ body {
 
 //----------------all the forms----------------
 
+button, select {
+    font-family : inherit;
+    font-size   : 100%;
+}
+
+input, textarea {
+    font-family : inherit;
+    font-size   : 75%;
+}
+
+textarea {
+    border: none;
+}
+
 .form {
     
     display: flex;
@@ -360,11 +392,11 @@ body {
         text-align: center;
     }
     
-    input {
+    input, textarea {
         color: $darkPurple;
     }
     
-    input:focus {
+    input:focus, textarea:focus {
         border: 2px solid $darkYellow;
         outline: none;
     }
@@ -390,6 +422,21 @@ body {
             border: 2px solid $darkPurple;
             margin-top: 10px;
             min-width:  140px;
+            transition: all .3s ease-in-out;
+            
+            &:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+            
+            &:enabled{
+                box-shadow: 0 8px 12px 0 rgba(0,0,0,0.16), 0 13px 45px 0 rgba(0,0,0,0.12);
+                
+                &:hover {
+                    transform: scale(1.05)
+                }
+                
+            }
             
         }
         
@@ -397,8 +444,32 @@ body {
             outline:none;
             border: 2px solid $darkYellow;
         }
+        
+        .postInput {
+            background-color: $lightPurple;
+            border-radius: 5px;
+            margin: 5px 0;
+            padding: 0.8em;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+                input, textarea {
+                    width: 500px;
+                }
+                .input1 {
+                    height: 70px;
+                }
+            
+                button {
+                    font-size: 0.4em;
+                    min-width: 70px;
+                    border-radius: 4px;
+                }
+            
+        }
     }
 }
+
 
 //----------------errors----------------
 
@@ -437,7 +508,6 @@ body {
     }
     
 }
-
 
 #animation img{
     max-width:180px;

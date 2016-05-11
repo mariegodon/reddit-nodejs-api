@@ -173,7 +173,7 @@ module.exports = function RedditAPI(conn) {
             //bind `this` for later use inside function
             var that = this;
             conn.query(`
-            SELECT p.id AS postID, p.url, p.userId, p.title, p.createdAt, p.updatedAt, u.username, SUM(v.vote) AS score
+            SELECT p.id AS postId, p.url, p.userId, p.title, p.createdAt, p.updatedAt, u.username, SUM(v.vote) AS score
             FROM posts p LEFT JOIN votes v ON v.postId = p.id LEFT JOIN users u ON u.id = p.userId WHERE p.id = ? GROUP BY p.id
             `, [postId], function(err, results) {
                 if (err) {

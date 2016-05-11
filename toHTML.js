@@ -14,34 +14,34 @@ function PostsInHTML(result) {
                     var postRedirect = `../posts/${post.id}`; 
                     return(
                     <li>
-                    <div className = 'title'>
-                    <h2><a href = {postRedirect}>{post.title}</a></h2>
-                    </div>
-                    <div className = 'info'>
-                    user: {post.user.username} <br />
-                    url: {post.url} <br />
-                    created: {moment(post.createdAt).fromNow()} <br />
-                    </div>
-                    <div className = 'placeKitten'>
-                    <img src="http://placekitten.com/125/125" />
-                    </div>
-                    <div className = 'voting'>
-                    <div className = 'upVote'>
-                    <form action="/vote" method="post" >
-                    <input type="hidden" name="vote" value="1" />
-                    <input type="hidden" name="postId" value={post.id} />
-                    <button type="submit"><span>upvote this</span></button>
-                    </form>
-                    <div id = 'voteScore'>{post.voteScore}</div>
-                    </div>
-                    <div className = 'downVote'>
-                    <form action="/vote" method="post">
-                    <input type="hidden" name="vote" value="-1" />
-                    <input type="hidden" name="postId" value={post.id} />
-                    <button type="submit"><span>downvote this</span></button>
-                    </form>
-                    </div>
-                    </div>
+                        <div className = 'title'>
+                            <h2><a href = {postRedirect}>{post.title}</a></h2>
+                        </div>
+                        <div className = 'info'>
+                            user: {post.user.username} <br />
+                            url: {post.url} <br />
+                            created: {moment(post.createdAt).fromNow()} <br />
+                        </div>
+                        <div className = 'placeKitten'>
+                            <img src="http://placekitten.com/125/125" />
+                        </div>
+                        <div className = 'voting'>
+                            <div className = 'upVote'>
+                                <form action="/vote" method="post" className='voteForm'>
+                                    <input type="hidden" name="vote" value="1" />
+                                    <input type="hidden" name="postId" value={post.id} />
+                                    <button type="submit"><span>upvote this</span></button>
+                                </form>
+                            </div>
+                            <div className='voteScore' id={post.id}>{post.voteScore}</div>
+                            <div className = 'downVote'>
+                                <form action="/vote" method="post" className='voteForm'>
+                                    <input type="hidden" name="vote" value="-1" />
+                                    <input type="hidden" name="postId" value={post.id} />
+                                    <button type="submit"><span>downvote this</span></button>
+                                </form>
+                            </div>
+                        </div>
                     </li>
                     )
                     })
@@ -88,17 +88,17 @@ function SinglePost(post) {
             </div>
             <div className = 'voting'>
                 <div className = 'upVote'>
-                    <form action="/vote" method="post" >
+                    <form action="/vote" method="post" className='voteForm'>
                     <input type="hidden" name="vote" value="1" />
-                    <input type="hidden" name="postId" value={post.postID} />
+                    <input type="hidden" name="postId" value={post.postId} />
                     <button type="submit"><span>upvote this</span></button>
                     </form>
-                    <div id = 'voteScore'>{post.score}</div>
                 </div>
+                <div className='voteScore' id={post.postId}>{post.score}</div>
                 <div className = 'downVote'>
-                    <form action="/vote" method="post">
+                    <form action="/vote" method="post" className='voteForm'>
                     <input type="hidden" name="vote" value="-1" />
-                    <input type="hidden" name="postId" value={post.postID} />
+                    <input type="hidden" name="postId" value={post.postId} />
                     <button type="submit"><span>downvote this</span></button>
                     </form>
                 </div>
@@ -107,20 +107,20 @@ function SinglePost(post) {
     )
 }
 
-function VotePage(voteValue, post) {
-    return (
-        <div className = 'voted'>
-            <h1>Yay. You {voteValue}-voted this post.</h1><br />
-            <h2>{post[0].title}</h2>
-            <p>user: {post[0].username}<br />
-                url: {post[0].url}<br />
-                score: {post[0].score}<br />
-                created: {moment(post[0].createdAt).fromNow()} <br />
-            </p>
-            <p><a href = '../'> home </a></p>
-        </div>
-    )
-}
+// function VotePage(voteValue, post) {
+//     return (
+//         <div className = 'voted'>
+//             <h1>Yay. You {voteValue}-voted this post.</h1><br />
+//             <h2>{post[0].title}</h2>
+//             <p>user: {post[0].username}<br />
+//                 url: {post[0].url}<br />
+//                 score: {post[0].score}<br />
+//                 created: {moment(post[0].createdAt).fromNow()} <br />
+//             </p>
+//             <p><a href = '../'> home </a></p>
+//         </div>
+//     )
+// }
 
 function SignUp() {
     return (
@@ -128,13 +128,13 @@ function SignUp() {
         <form action="/signup" method="POST">
             <p>Create a username and password</p>
             <div>
-                <input id='input1' type="text" name="username" placeholder="username" />
+                <input className='input1' type="text" name="username" placeholder="username" />
             </div>
             <div>
-                <input id='input2' type="password" name="password" placeholder="password" />
+                <input className='input2' type="password" name="password" placeholder="password" />
             </div>
             <div>
-            <button id='submit' type="submit">Create account!</button>
+            <button className='submit' type="submit" disabled>Create account!</button>
             </div>
         </form>
         </div>
@@ -147,13 +147,13 @@ function LogIn() {
             <form action="/login" method="POST">
                 <p>Enter your username and password</p>
                 <div>
-                    <input id = 'input1' type="text" name="username" placeholder="username" />
+                    <input className= 'input1' type="text" name="username" placeholder="username" />
                 </div>
                 <div>
-                    <input id = 'input2' type="password" name="password" placeholder="password" />
+                    <input className= 'input2' type="password" name="password" placeholder="password" />
                 </div>
                 <div>
-                <button id = 'submit' type="submit">Sign in!</button>
+                <button className='submit' type="submit" disabled>Sign in!</button>
                 </div>
             </form>
         </div>
@@ -162,17 +162,18 @@ function LogIn() {
 
 function CreatePost() {
     return (
-        <div className = 'form'>
+        <div id="createPostForm" className = 'form'>
             <form action="/createPost" method="POST">
             <p>Create a post</p>
-            <div>
-                <input id='input1' type="text" name="title" placeholder="title"/>
+            <div className = 'postInput'>
+                <textarea className='input1' type="text" name="title" placeholder="title"/>
+            </div>
+            <div className = 'postInput'>
+                <input className='input2' type="text" name="url" placeholder="url"/>
+                <button id='suggestTitle' type='button' disabled>suggest title</button>
             </div>
             <div>
-                <input id='input2' type="text" name="url" placeholder="url"/>
-            </div>
-            <div>
-            <button id='submit' type="submit">Post!</button>
+            <button className='submit' type="submit" disabled>Post!</button>
             </div>
         </form>
     </div>
@@ -202,12 +203,13 @@ function addStyle(someHTML, req, welcomeUser) {
     }
 
     return `
+        <!DOCTYPE html>
+        <html>
         <head>
         <title>RedditClone</title>
+        <link rel='shortcut icon' href='/icon.ico'/>
         <link rel='stylesheet' href='/css/style.css' type = 'text/css' />
         <link href='https://fonts.googleapis.com/css?family=Work+Sans:400,100' rel='stylesheet' type='text/css'>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
-        <script type = 'text/javascript' src = '/script/script.js'></script>
         </head>
         <body>
         <div class = 'header'>
@@ -237,7 +239,11 @@ function addStyle(someHTML, req, welcomeUser) {
         </div>
         <div class = 'varContent'>
             ${someHTML}
+        </div>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+        <script type = 'text/javascript' src = '/script/script.js'></script>
         </body>
+        </html>
     `
 }
 
@@ -246,7 +252,7 @@ module.exports = {
     CommentList: CommentList,
     SingleComment: SingleComment,
     SinglePost: SinglePost,
-    VotePage: VotePage,
+    //VotePage: VotePage,
     SignUp: SignUp,
     LogIn: LogIn,
     CreatePost: CreatePost,
